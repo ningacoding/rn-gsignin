@@ -45,9 +45,7 @@ public class Utils {
         WritableArray scopes = Arguments.createArray();
         for (Scope scope : acct.getGrantedScopes()) {
             String scopeString = scope.toString();
-            if (scopeString.startsWith("http")) {
-                scopes.pushString(scopeString);
-            }
+            scopes.pushString(scopeString);
         }
         params.putArray("scopes", scopes);
         return params;

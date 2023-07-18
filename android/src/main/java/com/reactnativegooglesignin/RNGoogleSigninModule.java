@@ -20,7 +20,6 @@ import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.BaseActivityEventListener;
 import com.facebook.react.bridge.Promise;
 import com.facebook.react.bridge.ReactApplicationContext;
-import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
 import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.bridge.ReadableMap;
@@ -51,7 +50,7 @@ import java.util.Map;
 
 
 @ReactModule(name = RNGoogleSigninModule.MODULE_NAME)
-public class RNGoogleSigninModule extends ReactContextBaseJavaModule {
+public class RNGoogleSigninModule extends NativeGoogleSigninSpec {
     private GoogleSignInClient _apiClient;
 
     public static final int RC_SIGN_IN = 9001;
@@ -70,6 +69,7 @@ public class RNGoogleSigninModule extends ReactContextBaseJavaModule {
         return promiseWrapper;
     }
 
+    @NonNull
     @Override
     public String getName() {
         return MODULE_NAME;
@@ -82,14 +82,11 @@ public class RNGoogleSigninModule extends ReactContextBaseJavaModule {
     }
 
     @Override
-    public Map<String, Object> getConstants() {
+    protected Map<String, Object> getTypedExportedConstants() {
         final Map<String, Object> constants = new HashMap<>();
         constants.put("BUTTON_SIZE_ICON", SignInButton.SIZE_ICON_ONLY);
         constants.put("BUTTON_SIZE_STANDARD", SignInButton.SIZE_STANDARD);
         constants.put("BUTTON_SIZE_WIDE", SignInButton.SIZE_WIDE);
-        constants.put("BUTTON_COLOR_AUTO", SignInButton.COLOR_AUTO);
-        constants.put("BUTTON_COLOR_LIGHT", SignInButton.COLOR_LIGHT);
-        constants.put("BUTTON_COLOR_DARK", SignInButton.COLOR_DARK);
         constants.put("SIGN_IN_CANCELLED", String.valueOf(GoogleSignInStatusCodes.SIGN_IN_CANCELLED));
         constants.put("SIGN_IN_REQUIRED", String.valueOf(CommonStatusCodes.SIGN_IN_REQUIRED));
         constants.put("IN_PROGRESS", ASYNC_OP_IN_PROGRESS);
@@ -149,21 +146,13 @@ public class RNGoogleSigninModule extends ReactContextBaseJavaModule {
             return;
         }
         promiseWrapper.setPromiseWithInProgressCheck(promise, "signInSilently");
-        UiThreadUtil.runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                Task<GoogleSignInAccount> result = _apiClient.silentSignIn();
-                if (result.isSuccessful()) {
-                    // There's immediate result available.
-                    handleSignInTaskResult(result);
-                } else {
-                    result.addOnCompleteListener(new OnCompleteListener() {
-                        @Override
-                        public void onComplete(@NonNull Task task) {
-                            handleSignInTaskResult(task);
-                        }
-                    });
-                }
+        UiThreadUtil.runOnUiThread(() -> {
+            Task<GoogleSignInAccount> result = _apiClient.silentSignIn();
+            if (result.isSuccessful()) {
+                // There's immediate result available.
+                handleSignInTaskResult(result);
+            } else {
+                result.addOnCompleteListener((OnCompleteListener) task -> handleSignInTaskResult(task));
             }
         });
     }
@@ -272,12 +261,7 @@ public class RNGoogleSigninModule extends ReactContextBaseJavaModule {
         }
 
         _apiClient.signOut()
-                .addOnCompleteListener(new OnCompleteListener<Void>() {
-                    @Override
-                    public void onComplete(@NonNull Task<Void> task) {
-                        handleSignOutOrRevokeAccessTask(task, promise);
-                    }
-                });
+                .addOnCompleteListener(task -> handleSignOutOrRevokeAccessTask(task, promise));
     }
 
     private void handleSignOutOrRevokeAccessTask(@NonNull Task<Void> task, final Promise promise) {
@@ -298,24 +282,19 @@ public class RNGoogleSigninModule extends ReactContextBaseJavaModule {
         }
 
         _apiClient.revokeAccess()
-                .addOnCompleteListener(new OnCompleteListener<Void>() {
-                    @Override
-                    public void onComplete(@NonNull Task<Void> task) {
-                        handleSignOutOrRevokeAccessTask(task, promise);
-                    }
-                });
+                .addOnCompleteListener(task -> handleSignOutOrRevokeAccessTask(task, promise));
     }
 
-    @ReactMethod
-    public void isSignedIn(Promise promise) {
+    @ReactMethod(isBlockingSynchronousMethod = true)
+    public boolean hasPreviousSignIn() {
         boolean isSignedIn = GoogleSignIn.getLastSignedInAccount(getReactApplicationContext()) != null;
-        promise.resolve(isSignedIn);
+        return isSignedIn;
     }
 
-    @ReactMethod
-    public void getCurrentUser(Promise promise) {
+    @ReactMethod(isBlockingSynchronousMethod = true)
+    public @Nullable WritableMap getCurrentUser() {
         GoogleSignInAccount account = GoogleSignIn.getLastSignedInAccount(getReactApplicationContext());
-        promise.resolve(account == null ? null : getUserProperties(account));
+        return account == null ? null : getUserProperties(account);
     }
 
     @ReactMethod

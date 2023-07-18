@@ -4,10 +4,6 @@
   <a href="https://www.npmjs.com/package/@react-native-google-signin/google-signin"><img src="https://badge.fury.io/js/@react-native-google-signin%2Fgoogle-signin.svg" alt="NPM Version"></a>
 </p>
 
-### 🚧🚧 New features planned: looking for sponsors and collaborators 🚧🚧
-
-See this [issue](https://github.com/react-native-google-signin/google-signin/issues/942)
-
 ## Features
 
 - Support all 3 types of authentication methods (standard, with server-side validation or with offline access (aka server-side access))
@@ -21,6 +17,36 @@ See this [issue](https://github.com/react-native-google-signin/google-signin/iss
 - RN >= 0.60
 
 ## Project setup and initialization
+
+### ❤️❤️ Thank you for sponsoring! ❤️❤️
+
+The sponsors-only package is hosted on GitHub npm packages registry ([see docs](https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-npm-registry)).
+
+To install it, you need to get a Personal Access Token with `packages:read` permission which you can obtain [here](https://github.com/settings/tokens).
+
+Additionally, you need to set up your package manager so that it fetches `@react-native-google-signin/google-signin` from the GH packages registry.
+
+This depends on what package manager you use:
+
+For npm or yarn 1, create a `.npmrc` file in your project root with the following content:
+
+```
+//npm.pkg.github.com/:_authToken="your_GH_personal_access_token"
+@react-native-google-signin:registry=https://npm.pkg.github.com/
+```
+
+For yarn 3, create a `.yarnrc.yml` file in your project root with the following content:
+
+```yml
+npmScopes:
+  react-native-google-signin:
+    npmRegistryServer: https://npm.pkg.github.com
+    npmAuthToken: your_GH_personal_access_token
+```
+
+If you use another package manager, please refer to its documentation on how to set up a custom registry.
+
+Then you can install the package with `yarn add @react-native-google-signin/google-signin`
 
 `yarn add @react-native-google-signin/google-signin`
 
@@ -105,7 +131,10 @@ Options: an object which contains a single key:
 
 ```js
 // import statusCodes along with GoogleSignin
-import { GoogleSignin, statusCodes } from '@react-native-google-signin/google-signin';
+import {
+  GoogleSignin,
+  statusCodes,
+} from '@react-native-google-signin/google-signin';
 
 // Somewhere in your code
 signIn = async () => {
@@ -162,27 +191,27 @@ getCurrentUserInfo = async () => {
 };
 ```
 
-#### `isSignedIn()`
+#### `hasPreviousSignIn()`
 
-This method may be used to find out whether some user previously signed in. It returns a promise which resolves with a boolean value (it never rejects). In the native layer, this is a synchronous call and will resolve even when the device is offline.
+This synchronous method may be used to find out whether some user previously signed in. It returns a boolean value.
 
-Note that `isSignedIn()` can return true but `getCurrentUser()` can return `null` in which case you can call `signInSilently()` to recover the user.
+Note that `hasPreviousSignIn()` can return true but `getCurrentUser()` can return `null` in which case you can call `signInSilently()` to recover the user.
 However, it may happen that calling `signInSilently()` rejects with an error (e.g. due to a network issue).
 
 ```js
-isSignedIn = async () => {
-  const isSignedIn = await GoogleSignin.isSignedIn();
-  setState({ isLoginScreenPresented: !isSignedIn });
+hasPreviousSignIn = async () => {
+  const hasPreviousSignIn = GoogleSignin.hasPreviousSignIn();
+  setState({ hasPreviousSignIn });
 };
 ```
 
 #### `getCurrentUser()`
 
-This method resolves with `null` or `userInfo` object of the currently signed-in user. The call never rejects and in the native layer, this is a synchronous call.
+This is a synchronous method that returns `null` or `userInfo` object of the currently signed-in user.
 
 ```js
 getCurrentUser = async () => {
-  const currentUser = await GoogleSignin.getCurrentUser();
+  const currentUser = GoogleSignin.getCurrentUser();
   setState({ currentUser });
 };
 ```
@@ -265,7 +294,10 @@ These are useful when determining which kind of error has occured during sign in
 ![signin button](img/signin-button.png)
 
 ```js
-import { GoogleSignin, GoogleSigninButton } from '@react-native-google-signin/google-signin';
+import {
+  GoogleSignin,
+  GoogleSigninButton,
+} from '@react-native-google-signin/google-signin';
 
 <GoogleSigninButton
   size={GoogleSigninButton.Size.Wide}
@@ -285,14 +317,14 @@ Possible values:
 - Size.Standard: icon with 'Sign in'. Recommended size of 230 x 48.
 - Size.Wide: icon with 'Sign in with Google'. Recommended size of 312 x 48.
 
-Default: `Size.Standard`. Given the `size` prop you pass, we'll automatically apply the recommended size, but you can override it by passing the style prop as in `style={{ width, height }}`.
+Default: `GoogleSigninButton.Size.Standard`. Given the `size` prop you pass, we'll automatically apply the recommended size, but you can override it by passing the style prop as in `style={{ width, height }}`.
 
 ##### `color`
 
 Possible values:
 
-- Color.Dark: apply a blue background
-- Color.Light: apply a light gray background
+- GoogleSigninButton.Color.Dark: apply a blue background
+- GoogleSigninButton.Color.Light: apply a light gray background
 
 ##### `disabled`
 

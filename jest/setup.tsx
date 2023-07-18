@@ -26,33 +26,36 @@ const MockGoogleSigninButton = (props: GoogleSigninButtonProps) => {
   );
 };
 MockGoogleSigninButton.Size = { Standard: 0, Wide: 1, Icon: 2 };
-MockGoogleSigninButton.Color = { Dark: 0, Light: 1 };
+MockGoogleSigninButton.Color = { Dark: 'dark', Light: 'light' } as const;
 
-const MockGoogleSigninButtonTyped: typeof GoogleSigninButton = MockGoogleSigninButton;
+const MockGoogleSigninButtonTyped: typeof GoogleSigninButton =
+  MockGoogleSigninButton;
 
-const mockStatusCodes = {
+const mockStatusCodes = Object.freeze({
   SIGN_IN_CANCELLED: 'mock_SIGN_IN_CANCELLED',
   IN_PROGRESS: 'mock_IN_PROGRESS',
   PLAY_SERVICES_NOT_AVAILABLE: 'mock_PLAY_SERVICES_NOT_AVAILABLE',
   SIGN_IN_REQUIRED: 'mock_SIGN_IN_REQUIRED',
-};
+} as const);
 
 const mockGoogleSignin: typeof GoogleSigninSingleton = {
   configure: jest.fn(),
   hasPlayServices: jest.fn().mockResolvedValue(true),
-  getTokens: jest
-    .fn()
-    .mockResolvedValue({ accessToken: 'mockAccessToken', idToken: 'mockIdToken' }),
+  getTokens: jest.fn().mockResolvedValue({
+    accessToken: 'mockAccessToken',
+    idToken: 'mockIdToken',
+  }),
   signIn: jest.fn().mockResolvedValue(mockUserInfo),
   signInSilently: jest.fn().mockResolvedValue(mockUserInfo),
   revokeAccess: jest.fn().mockResolvedValue(null),
   signOut: jest.fn().mockResolvedValue(null),
-  isSignedIn: jest.fn().mockResolvedValue(true),
+  hasPreviousSignIn: jest.fn().mockReturnValue(true),
   addScopes: jest.fn().mockResolvedValue(mockUserInfo),
-  getCurrentUser: jest.fn().mockResolvedValue(mockUserInfo),
+  getCurrentUser: jest.fn().mockReturnValue(mockUserInfo),
   clearCachedAccessToken: jest.fn().mockResolvedValue(null),
 };
 
+// TODO @vonovak mock closer to native level
 jest.mock('@react-native-google-signin/google-signin', () => ({
   statusCodes: mockStatusCodes,
   GoogleSignin: mockGoogleSignin,

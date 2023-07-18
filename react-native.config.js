@@ -18,13 +18,13 @@ const project = (() => {
 
 module.exports = {
   dependencies: {
-    // Help rn-cli find and autolink this library
-    '@react-native-google-signin/google-signin': {
-      root: __dirname,
-    },
     ...(project
       ? {
-          expo: {
+          // Help rn-cli find and autolink this library
+          '@react-native-google-signin/google-signin': {
+            root: __dirname,
+          },
+          'expo': {
             // otherwise RN cli will try to autolink expo
             platforms: {
               ios: null,

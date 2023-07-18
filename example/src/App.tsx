@@ -70,28 +70,38 @@ export default class GoogleSigninSampleApp extends Component<{}, State> {
   render() {
     const { userInfo } = this.state;
 
-    const body = userInfo ? this.renderUserInfo(userInfo) : this.renderSignInButton();
+    const body = userInfo ? (
+      this.renderUserInfo(userInfo)
+    ) : (
+      <GoogleSigninButton
+        size={GoogleSigninButton.Size.Standard}
+        color={GoogleSigninButton.Color.Light}
+        onPress={this._signIn}
+        accessibilityLabel={'sign in'}
+      />
+    );
     return (
-      <SafeAreaView style={[styles.container, styles.pageContainer]}>
-        <ScrollView>
-          {this.renderIsSignedIn()}
+      <SafeAreaView style={[styles.pageContainer]}>
+        <ScrollView contentContainerStyle={styles.container}>
+          {this.renderHasPreviousSignIn()}
           {this.renderAddScopes()}
           {this.renderGetCurrentUser()}
           {this.renderGetTokens()}
           {body}
+          {this.renderError()}
         </ScrollView>
       </SafeAreaView>
     );
   }
 
-  renderIsSignedIn() {
+  renderHasPreviousSignIn() {
     return (
       <Button
         onPress={async () => {
-          const isSignedIn = await GoogleSignin.isSignedIn();
-          Alert.alert(String(isSignedIn));
+          const hasPreviousSignIn = GoogleSignin.hasPreviousSignIn();
+          Alert.alert(String(hasPreviousSignIn));
         }}
-        title="is user signed in?"
+        title="is there a user signed in?"
       />
     );
   }
@@ -128,8 +138,8 @@ export default class GoogleSigninSampleApp extends Component<{}, State> {
     return (
       <Button
         onPress={async () => {
-          const isSignedIn = await GoogleSignin.getTokens();
-          Alert.alert('tokens', prettyJson(isSignedIn));
+          const tokens = await GoogleSignin.getTokens();
+          Alert.alert('tokens', prettyJson(tokens));
         }}
         title="get tokens"
       />
@@ -139,10 +149,13 @@ export default class GoogleSigninSampleApp extends Component<{}, State> {
   renderUserInfo(userInfo: User) {
     return (
       <View style={styles.container}>
-        <Text style={styles.welcomeText}>Welcome {userInfo.user.name}</Text>
+        <Text style={styles.welcomeText}>Welcome, {userInfo.user.name}</Text>
         <Text selectable style={{ color: 'black' }}>
           Your user info:{' '}
-          {prettyJson({ ...userInfo, idToken: `${userInfo?.idToken?.slice(0, 5)}...` })}
+          {prettyJson({
+            ...userInfo,
+            idToken: `${userInfo.idToken?.slice(0, 5)}...`,
+          })}
         </Text>
         {userInfo.user.photo && (
           <Image
@@ -153,20 +166,6 @@ export default class GoogleSigninSampleApp extends Component<{}, State> {
         <TokenClearingView />
 
         <Button onPress={this._signOut} title="Log out" />
-        {this.renderError()}
-      </View>
-    );
-  }
-
-  renderSignInButton() {
-    return (
-      <View style={styles.container}>
-        <GoogleSigninButton
-          size={GoogleSigninButton.Size.Standard}
-          color={GoogleSigninButton.Color.Dark}
-          onPress={this._signIn}
-        />
-        {this.renderError()}
       </View>
     );
   }
@@ -233,10 +232,13 @@ export default class GoogleSigninSampleApp extends Component<{}, State> {
 
 const styles = StyleSheet.create({
   container: {
-    justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#F5FCFF',
   },
-  welcomeText: { fontSize: 18, fontWeight: 'bold', marginBottom: 20, color: 'black' },
-  pageContainer: { flex: 1 },
+  welcomeText: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 20,
+    color: 'black',
+  },
+  pageContainer: { flex: 1, backgroundColor: '#F5FCFF' },
 });

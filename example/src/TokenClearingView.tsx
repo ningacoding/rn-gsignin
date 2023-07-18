@@ -21,7 +21,7 @@ export function TokenClearingView() {
         placeholderTextColor={'grey'}
         placeholder={'put token to clear here'}
       />
-      <Button title="clear token" onPress={clearToken} />
+      <Button title="clear cached access token" onPress={clearToken} />
     </>
   );
 }
