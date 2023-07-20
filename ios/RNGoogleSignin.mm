@@ -35,6 +35,7 @@ static NSString *const kClientIdKey = @"CLIENT_ID";
            };
 }
 
+#ifdef RCT_NEW_ARCH_ENABLED
 - (facebook::react::ModuleConstants<JS::NativeGoogleSignin::Constants>)getConstants {
   return facebook::react::typedConstants<JS::NativeGoogleSignin::Constants>(
           {.BUTTON_SIZE_ICON = kGIDSignInButtonStyleIconOnly,
@@ -46,6 +47,7 @@ static NSString *const kClientIdKey = @"CLIENT_ID";
                   .PLAY_SERVICES_NOT_AVAILABLE = PLAY_SERVICES_NOT_AVAILABLE // this never happens on iOS
           });
 }
+#endif
 
 + (BOOL)requiresMainQueueSetup
 {
@@ -292,7 +294,6 @@ RCT_EXPORT_METHOD(getTokens:(RCTPromiseResolveBlock)resolve
 }
 
 #ifdef RCT_NEW_ARCH_ENABLED
-
 - (std::shared_ptr<facebook::react::TurboModule>)getTurboModule:
    (const facebook::react::ObjCTurboModule::InitParams &)params
 {
