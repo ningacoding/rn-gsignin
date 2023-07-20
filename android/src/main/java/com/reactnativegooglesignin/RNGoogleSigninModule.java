@@ -1,6 +1,8 @@
 package com.reactnativegooglesignin;
 
 import static com.reactnativegooglesignin.PromiseWrapper.ASYNC_OP_IN_PROGRESS;
+import static com.reactnativegooglesignin.RNOneTapSignInModule.NO_SAVED_CREDENTIAL_FOUND;
+import static com.reactnativegooglesignin.RNOneTapSignInModule.ONE_TAP_START_FAILED;
 import static com.reactnativegooglesignin.Utils.createScopesArray;
 import static com.reactnativegooglesignin.Utils.getExceptionCode;
 import static com.reactnativegooglesignin.Utils.getSignInOptions;
@@ -56,14 +58,14 @@ public class RNGoogleSigninModule extends NativeGoogleSigninSpec {
     public static final int RC_SIGN_IN = 9001;
     public static final int REQUEST_CODE_RECOVER_AUTH = 53294;
     public static final int REQUEST_CODE_ADD_SCOPES = 53295;
-    public static final String MODULE_NAME = "RNGoogleSignin";
+    public static final String MODULE_NAME = NativeGoogleSigninSpec.NAME;
     public static final String PLAY_SERVICES_NOT_AVAILABLE = "PLAY_SERVICES_NOT_AVAILABLE";
     public static final String ERROR_USER_RECOVERABLE_AUTH = "ERROR_USER_RECOVERABLE_AUTH";
     private static final String SHOULD_RECOVER = "SHOULD_RECOVER";
 
     private PendingAuthRecovery pendingAuthRecovery;
 
-    private PromiseWrapper promiseWrapper;
+    private PromiseWrapper promiseWrapper = new PromiseWrapper();
 
     public PromiseWrapper getPromiseWrapper() {
         return promiseWrapper;
@@ -77,7 +79,6 @@ public class RNGoogleSigninModule extends NativeGoogleSigninSpec {
 
     public RNGoogleSigninModule(final ReactApplicationContext reactContext) {
         super(reactContext);
-        promiseWrapper = new PromiseWrapper();
         reactContext.addActivityEventListener(new RNGoogleSigninActivityEventListener());
     }
 
@@ -91,6 +92,10 @@ public class RNGoogleSigninModule extends NativeGoogleSigninSpec {
         constants.put("SIGN_IN_REQUIRED", String.valueOf(CommonStatusCodes.SIGN_IN_REQUIRED));
         constants.put("IN_PROGRESS", ASYNC_OP_IN_PROGRESS);
         constants.put(PLAY_SERVICES_NOT_AVAILABLE, PLAY_SERVICES_NOT_AVAILABLE);
+
+        // one-tap only
+        constants.put(NO_SAVED_CREDENTIAL_FOUND, NO_SAVED_CREDENTIAL_FOUND);
+        constants.put(ONE_TAP_START_FAILED, ONE_TAP_START_FAILED);
         return constants;
     }
 
@@ -118,7 +123,7 @@ public class RNGoogleSigninModule extends NativeGoogleSigninSpec {
         }
     }
 
-    private static void rejectWithNullActivity(Promise promise) {
+    static void rejectWithNullActivity(Promise promise) {
         promise.reject(MODULE_NAME, "activity is null");
     }
 
@@ -187,12 +192,9 @@ public class RNGoogleSigninModule extends NativeGoogleSigninSpec {
             return;
         }
         promiseWrapper.setPromiseWithInProgressCheck(promise, "signIn");
-        UiThreadUtil.runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                Intent signInIntent = _apiClient.getSignInIntent();
-                activity.startActivityForResult(signInIntent, RC_SIGN_IN);
-            }
+        UiThreadUtil.runOnUiThread(() -> {
+            Intent signInIntent = _apiClient.getSignInIntent();
+            activity.startActivityForResult(signInIntent, RC_SIGN_IN);
         });
     }
 

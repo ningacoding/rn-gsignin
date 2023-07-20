@@ -22,6 +22,7 @@ export interface ConfigureParams {
   /**
    * If you want to specify the client ID of type iOS
    */
+  // TODO vonovak make exclusive with googleServicePlistPath
   iosClientId?: string;
 
   /**
@@ -100,6 +101,9 @@ export interface Spec extends TurboModule {
     BUTTON_SIZE_ICON: number;
     BUTTON_SIZE_WIDE: number;
     BUTTON_SIZE_STANDARD: number;
+    // one-tap specific constants
+    ONE_TAP_START_FAILED: string;
+    NO_SAVED_CREDENTIAL_FOUND: string;
   };
 }
 

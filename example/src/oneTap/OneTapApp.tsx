@@ -10,21 +10,20 @@ import {
   SafeAreaView,
 } from 'react-native';
 import {
-  GoogleSignin,
-  GoogleSigninButton,
+  GoogleOneTapSignIn,
   NativeModuleError,
   statusCodes,
 } from '@react-native-google-signin/google-signin';
 import type { User } from '@react-native-google-signin/google-signin';
 // @ts-ignore see docs/CONTRIBUTING.md for details
-import config from './config';
-import { TokenClearingView } from './TokenClearingView';
+import config from '../config';
+import { OneTapUser } from '../../../src/OneTapSignIn';
 
 type ErrorWithCode = Error & { code?: string };
 
 type State = {
   error?: ErrorWithCode;
-  userInfo?: User;
+  userInfo?: OneTapUser;
 };
 
 const prettyJson = (value: any) => {
@@ -38,115 +37,24 @@ export default class GoogleSigninSampleApp extends Component<{}, State> {
     error: undefined,
   };
 
-  async componentDidMount() {
-    this._configureGoogleSignIn();
-    await this._getCurrentUser();
-  }
-
-  _configureGoogleSignIn() {
-    GoogleSignin.configure({
-      webClientId: config.webClientId,
-      offlineAccess: false,
-      profileImageSize: PROFILE_IMAGE_SIZE,
-    });
-  }
-
-  async _getCurrentUser() {
-    try {
-      const userInfo = await GoogleSignin.signInSilently();
-      this.setState({ userInfo, error: undefined });
-    } catch (error) {
-      const typedError = error as NativeModuleError;
-      if (typedError.code === statusCodes.SIGN_IN_REQUIRED) {
-        this.setState({
-          error: new Error('User not signed it yet, please sign in :)'),
-        });
-      } else {
-        this.setState({ error: typedError });
-      }
-    }
-  }
-
   render() {
     const { userInfo } = this.state;
 
     const body = userInfo ? (
       this.renderUserInfo(userInfo)
     ) : (
-      <GoogleSigninButton
-        size={GoogleSigninButton.Size.Standard}
-        color={GoogleSigninButton.Color.Light}
-        onPress={this._signIn}
-        accessibilityLabel={'sign in'}
-      />
+      <>
+        <Button onPress={this._signIn} title="Sign in with One-tap!" />
+        <Button onPress={this._createAccount} title="Sign up with One-tap!" />
+      </>
     );
     return (
       <SafeAreaView style={[styles.pageContainer]}>
         <ScrollView contentContainerStyle={styles.container}>
-          {this.renderHasPreviousSignIn()}
-          {this.renderAddScopes()}
-          {this.renderGetCurrentUser()}
-          {this.renderGetTokens()}
           {body}
           {this.renderError()}
         </ScrollView>
       </SafeAreaView>
-    );
-  }
-
-  renderHasPreviousSignIn() {
-    return (
-      <Button
-        onPress={async () => {
-          const hasPreviousSignIn = GoogleSignin.hasPreviousSignIn();
-          Alert.alert(String(hasPreviousSignIn));
-        }}
-        title="is there a user signed in?"
-      />
-    );
-  }
-
-  renderGetCurrentUser() {
-    return (
-      <Button
-        onPress={async () => {
-          const userInfo = await GoogleSignin.getCurrentUser();
-          Alert.alert('current user', userInfo ? prettyJson(userInfo) : 'null');
-        }}
-        title="get current user"
-      />
-    );
-  }
-
-  renderAddScopes() {
-    return (
-      <Button
-        onPress={async () => {
-          const user = await GoogleSignin.addScopes({
-            scopes: ['https://www.googleapis.com/auth/user.gender.read'],
-          });
-          this._getCurrentUser();
-
-          Alert.alert('user', prettyJson(user));
-        }}
-        title="request more scopes"
-      />
-    );
-  }
-
-  renderGetTokens() {
-    return (
-      <Button
-        onPress={async () => {
-          try {
-            const tokens = await GoogleSignin.getTokens();
-            Alert.alert('tokens', prettyJson(tokens));
-          } catch (error) {
-            Alert.alert('error', String(error));
-          }
-        }}
-        title="get tokens"
-      />
     );
   }
 
@@ -159,6 +67,10 @@ export default class GoogleSigninSampleApp extends Component<{}, State> {
           {prettyJson({
             ...userInfo,
             idToken: `${userInfo.idToken?.slice(0, 5)}...`,
+            user: {
+              ...userInfo.user,
+              photo: `${userInfo.user.photo?.slice(0, 5)}...`,
+            },
           })}
         </Text>
         {userInfo.user.photo && (
@@ -167,7 +79,6 @@ export default class GoogleSigninSampleApp extends Component<{}, State> {
             source={{ uri: userInfo.user.photo }}
           />
         )}
-        <TokenClearingView />
 
         <Button onPress={this._signOut} title="Log out" />
       </View>
@@ -188,15 +99,32 @@ export default class GoogleSigninSampleApp extends Component<{}, State> {
     return null;
   }
 
+  _createAccount = async () => {
+    try {
+      const userInfo = await GoogleOneTapSignIn.createAccount({
+        webClientId: config.webClientId,
+      });
+      this.setState({ userInfo, error: undefined });
+    } catch (error) {
+      const typedError = error as NativeModuleError;
+      Alert.alert('Something went wrong', typedError.toString());
+    }
+  };
+
   _signIn = async () => {
     try {
-      await GoogleSignin.hasPlayServices();
-      const userInfo = await GoogleSignin.signIn();
+      const userInfo = await GoogleOneTapSignIn.signIn({
+        webClientId: config.webClientId,
+      });
       this.setState({ userInfo, error: undefined });
     } catch (error) {
       const typedError = error as NativeModuleError;
 
       switch (typedError.code) {
+        case statusCodes.NO_SAVED_CREDENTIAL_FOUND: {
+          this._createAccount();
+          break;
+        }
         case statusCodes.SIGN_IN_CANCELLED:
           // sign in was cancelled
           Alert.alert('cancelled');
@@ -220,8 +148,7 @@ export default class GoogleSigninSampleApp extends Component<{}, State> {
 
   _signOut = async () => {
     try {
-      await GoogleSignin.revokeAccess();
-      await GoogleSignin.signOut();
+      await GoogleOneTapSignIn.signOut();
 
       this.setState({ userInfo: undefined, error: undefined });
     } catch (error) {
@@ -237,6 +164,8 @@ export default class GoogleSigninSampleApp extends Component<{}, State> {
 const styles = StyleSheet.create({
   container: {
     alignItems: 'center',
+    justifyContent: 'center',
+    flexGrow: 1,
   },
   welcomeText: {
     fontSize: 18,

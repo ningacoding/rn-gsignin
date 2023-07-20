@@ -11,3 +11,5 @@ export type {
   AddScopesParams,
   HasPlayServicesParams,
 } from './spec/NativeGoogleSignin';
+export { GoogleOneTapSignIn } from './OneTapSignIn';
+export type { OneTapUser, OneTapSignInParams } from './OneTapSignIn';

@@ -6,7 +6,7 @@
 
 ## Features
 
-- Support all 3 types of authentication methods (standard, with server-side validation or with offline access (aka server-side access))
+- Supports [One-tap sign in](https://developers.google.com/identity/one-tap/android/overview) (not all apis are exposed at the moment) as well as the [legacy sign in](https://developers.google.com/identity/sign-in/android/start)
 - Promise-based API consistent between Android and iOS
 - Typings for TypeScript and Flow
 - Mock of the native module for testing with Jest
@@ -80,7 +80,75 @@ Next, rebuild your app as described in the ["Adding custom native code"](https:/
 
 ## Public API
 
-### 1. GoogleSignin
+### 1. [One-tap sign in](https://developers.google.com/identity/one-tap/android/overview)
+
+This is the easiest way to implement Google Sign In. It is a one-tap sign in flow that requires no or very little user interaction. It is available on Android.
+
+Please read the official docs [here](https://developers.google.com/identity/one-tap/android/overview).
+
+With the One Tap sign in, you need to keep track of the user state. I.e. there are no `hasPreviousSignIn` or `getCurrentUser` methods.
+
+#### `signIn`
+
+Attempts to sign in user automatically as explained [here](<https://developers.google.com/android/reference/com/google/android/gms/auth/api/identity/BeginSignInRequest.Builder#setAutoSelectEnabled(boolean)>).
+
+Returns a `Promise` that resolves with an object containing the user data (`OneTapUser`) or rejects in case of error.
+
+```ts
+import {
+  GoogleOneTapSignIn,
+  statusCodes,
+} from '@react-native-google-signin/google-signin';
+
+// Somewhere in your code
+signIn = async () => {
+  try {
+    const userInfo = await GoogleOneTapSignIn.signIn({
+      webClientId: config.webClientId,
+      nonce: 'your_nonce',
+    });
+    setState({ userInfo });
+  } catch (error) {
+    if (error.code === statusCodes.SIGN_IN_CANCELLED) {
+      // user cancelled the login flow
+    } else if (error.code === statusCodes.IN_PROGRESS) {
+      // operation (e.g. sign in) is in progress already
+    } else if (error.code === statusCodes.ONE_TAP_START_FAILED) {
+      // starting the one tap dialog failed
+    } else if (error.code === statusCodes.NO_SAVED_CREDENTIAL_FOUND) {
+      // No saved credentials found. Launch the One Tap sign-up flow (use GoogleOneTapSignIn.signUp)
+      // or do nothing and continue presenting the signed-out UI.
+    } else {
+      // some other error happened
+    }
+  }
+};
+```
+
+#### `createAccount`
+
+Starts a flow to create a user account. Also can be used if `signIn` rejects with `NO_SAVED_CREDENTIAL_FOUND` error, as shown in the code snippet above.
+
+Returns a `Promise` that resolves with an object containing the user data (`OneTapUser`) or rejects in case of error.
+
+```ts
+await GoogleOneTapSignIn.createAccount({
+  webClientId: config.webClientId,
+  nonce: 'your_nonce',
+});
+```
+
+#### `signOut`
+
+Returns a Promise that resolves with `null` or rejects in case of error.
+
+```ts
+await GoogleOneTapSignIn.signOut();
+```
+
+### 2. GoogleSignin
+
+This exposes the [Google Sign-In for Android (legacy)](https://developers.google.com/identity/sign-in/android/start) and [Google Sign-In for iOS](https://developers.google.com/identity/sign-in/ios/start) SDKs.
 
 ```js
 import {
@@ -289,7 +357,7 @@ These are useful when determining which kind of error has occured during sign in
 
 [Example how to use `statusCodes`](#signinoptions--loginhint-string-).
 
-### 2. GoogleSigninButton
+### 3. GoogleSigninButton
 
 ![signin button](img/signin-button.png)
 

@@ -22,6 +22,8 @@ public class RNGoogleSigninPackage extends TurboReactPackage {
   public NativeModule getModule(String name, ReactApplicationContext reactContext) {
     if (name.equals(RNGoogleSigninModule.NAME)) {
       return new RNGoogleSigninModule(reactContext);
+    } else if (name.equals(RNOneTapSignInModule.NAME)) {
+      return new RNOneTapSignInModule(reactContext);
     } else {
       return null;
     }
@@ -41,6 +43,18 @@ public class RNGoogleSigninPackage extends TurboReactPackage {
           false, // canOverrideExistingModule
           false, // needsEagerInit
           true, // hasConstants
+          false, // isCxxModule
+          isTurboModule // isTurboModule
+        ));
+      moduleInfos.put(
+        RNOneTapSignInModule.NAME,
+        new ReactModuleInfo(
+          RNOneTapSignInModule.NAME,
+          RNOneTapSignInModule.NAME,
+//          "RNOneTapSignInModule",
+          false, // canOverrideExistingModule
+          false, // needsEagerInit
+          false, // hasConstants
           false, // isCxxModule
           isTurboModule // isTurboModule
         ));

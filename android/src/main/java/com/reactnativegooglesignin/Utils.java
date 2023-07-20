@@ -5,8 +5,11 @@ import androidx.annotation.NonNull;
 
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.ReadableArray;
+import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.bridge.WritableArray;
 import com.facebook.react.bridge.WritableMap;
+import com.google.android.gms.auth.api.identity.BeginSignInRequest;
+import com.google.android.gms.auth.api.identity.SignInCredential;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.common.api.ApiException;
@@ -51,6 +54,24 @@ public class Utils {
         return params;
     }
 
+    static WritableMap getUserProperties(@NonNull SignInCredential acct) {
+        Uri photoUrl = acct.getProfilePictureUri();
+
+        WritableMap user = Arguments.createMap();
+        user.putString("id", acct.getId());
+        user.putString("name", acct.getDisplayName());
+        user.putString("givenName", acct.getGivenName());
+        user.putString("familyName", acct.getFamilyName());
+        user.putString("photo", photoUrl != null ? photoUrl.toString() : null);
+
+        WritableMap params = Arguments.createMap();
+        params.putMap("user", user);
+        params.putString("idToken", acct.getGoogleIdToken());
+        params.putString("password", acct.getPassword());
+
+        return params;
+    }
+
     static GoogleSignInOptions getSignInOptions(
             final Scope[] scopes,
             final String webClientId,
@@ -74,6 +95,32 @@ public class Utils {
             googleSignInOptionsBuilder.setHostedDomain(hostedDomain);
         }
         return googleSignInOptionsBuilder.build();
+    }
+
+    static BeginSignInRequest buildOneTapSignInRequest(
+        ReadableMap params
+    ) {
+        String webClientId = params.getString("webClientId");
+        assert webClientId != null;
+        String nonce = params.getString("nonce");
+        boolean autoSignIn = params.getBoolean("autoSignIn");
+        boolean filterByAuthorizedAccounts = params.getBoolean("filterByAuthorizedAccounts");
+        boolean passwordRequestSupported = params.getBoolean("passwordRequestSupported");
+        boolean idTokenRequestSupported = params.getBoolean("idTokenRequestSupported");
+
+        return BeginSignInRequest.builder()
+            .setPasswordRequestOptions(BeginSignInRequest.PasswordRequestOptions.builder()
+                .setSupported(passwordRequestSupported)
+                .build())
+            .setGoogleIdTokenRequestOptions(BeginSignInRequest.GoogleIdTokenRequestOptions.builder()
+                .setSupported(idTokenRequestSupported)
+                .setServerClientId(webClientId)
+                .setNonce(nonce)
+                .setFilterByAuthorizedAccounts(filterByAuthorizedAccounts)
+                .build())
+            // Automatically sign in when exactly one credential is retrieved.
+            .setAutoSelectEnabled(autoSignIn)
+            .build();
     }
 
     @NonNull

@@ -2,12 +2,16 @@
   "$schema": "https://raw.githubusercontent.com/microsoft/react-native-test-app/trunk/schema.json",
   "name": "google-signin-example",
   "displayName": "google-signin-example",
-  "singleApp": "defaultApp",
   "components": [
     {
       "appKey": "google-signin-example",
       "displayName": "google-signin-example",
       "slug": "defaultApp"
+    },
+    {
+      "appKey": "google-one-tap-example",
+      "displayName": "google-one-tap-example",
+      "slug": "oneTapApp"
     }
   ],
   "android": {
