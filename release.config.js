@@ -2,7 +2,7 @@ const join = require('path').join;
 const readFileSync = require('fs').readFileSync;
 
 module.exports = {
-  branches: ['master', 'feat/migrate'],
+  branches: ['master', 'main'],
   plugins: [
     '@semantic-release/commit-analyzer',
     [

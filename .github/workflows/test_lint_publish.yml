@@ -5,7 +5,7 @@ name: test and publish
 
 on:
   push:
-    branches: [master]
+    branches: [master, main]
   pull_request:
 
   # Allows you to run this workflow manually from the Actions tab
@@ -27,7 +27,7 @@ jobs:
 
   publish-npm:
     needs: build
-    if: github.ref == 'refs/heads/master'
+    if: github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
