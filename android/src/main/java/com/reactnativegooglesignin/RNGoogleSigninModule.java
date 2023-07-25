@@ -60,12 +60,11 @@ public class RNGoogleSigninModule extends NativeGoogleSigninSpec {
     public static final int REQUEST_CODE_ADD_SCOPES = 53295;
     public static final String MODULE_NAME = NativeGoogleSigninSpec.NAME;
     public static final String PLAY_SERVICES_NOT_AVAILABLE = "PLAY_SERVICES_NOT_AVAILABLE";
-    public static final String ERROR_USER_RECOVERABLE_AUTH = "ERROR_USER_RECOVERABLE_AUTH";
     private static final String SHOULD_RECOVER = "SHOULD_RECOVER";
 
     private PendingAuthRecovery pendingAuthRecovery;
 
-    private PromiseWrapper promiseWrapper = new PromiseWrapper();
+    private PromiseWrapper promiseWrapper = new PromiseWrapper(NativeGoogleSigninSpec.NAME);
 
     public PromiseWrapper getPromiseWrapper() {
         return promiseWrapper;
@@ -166,15 +165,13 @@ public class RNGoogleSigninModule extends NativeGoogleSigninSpec {
         try {
             GoogleSignInAccount account = result.getResult(ApiException.class);
             if (account == null) {
-                promiseWrapper.reject(MODULE_NAME, "GoogleSignInAccount instance was null");
+                promiseWrapper.reject("GoogleSignInAccount instance was null");
             } else {
                 WritableMap userParams = getUserProperties(account);
                 promiseWrapper.resolve(userParams);
             }
         } catch (ApiException e) {
-            int code = e.getStatusCode();
-            String errorDescription = GoogleSignInStatusCodes.getStatusCodeString(code);
-            promiseWrapper.reject(String.valueOf(code), errorDescription);
+            promiseWrapper.reject(e);
         }
     }
 
@@ -233,13 +230,13 @@ public class RNGoogleSigninModule extends NativeGoogleSigninSpec {
                 if (resultCode == Activity.RESULT_OK) {
                     rerunFailedAuthTokenTask();
                 } else {
-                    promiseWrapper.reject(MODULE_NAME, "Failed authentication recovery attempt, probably user-rejected.");
+                    promiseWrapper.reject("Failed authentication recovery attempt, probably user-rejected.");
                 }
             } else if (requestCode == REQUEST_CODE_ADD_SCOPES) {
                 if (resultCode == Activity.RESULT_OK) {
                   promiseWrapper.resolve(true);
                 } else {
-                  promiseWrapper.reject(MODULE_NAME, "Failed to add scopes.");
+                  promiseWrapper.reject("Failed to add scopes.");
                 }
             }
         }
@@ -251,7 +248,7 @@ public class RNGoogleSigninModule extends NativeGoogleSigninSpec {
             new AccessTokenRetrievalTask(this).execute(userProperties, null);
         } else {
             // this is unlikely to happen, since we set the pendingRecovery in AccessTokenRetrievalTask
-            promiseWrapper.reject(MODULE_NAME, "rerunFailedAuthTokenTask: recovery failed");
+            promiseWrapper.reject("rerunFailedAuthTokenTask: recovery failed");
         }
     }
 
@@ -309,7 +306,7 @@ public class RNGoogleSigninModule extends NativeGoogleSigninSpec {
     public void getTokens(final Promise promise) {
         final GoogleSignInAccount account = GoogleSignIn.getLastSignedInAccount(getReactApplicationContext());
         if (account == null) {
-            promise.reject(MODULE_NAME, "getTokens requires a user to be signed in");
+            promise.reject("getTokens", "getTokens requires a user to be signed in");
             return;
         }
 
@@ -368,10 +365,10 @@ public class RNGoogleSigninModule extends NativeGoogleSigninSpec {
                 if (shouldRecover) {
                     attemptRecovery(moduleInstance, cause, userProperties);
                 } else {
-                    moduleInstance.promiseWrapper.reject(ERROR_USER_RECOVERABLE_AUTH, cause);
+                    moduleInstance.promiseWrapper.reject(cause);
                 }
             } else {
-                moduleInstance.promiseWrapper.reject(MODULE_NAME, cause);
+                moduleInstance.promiseWrapper.reject(cause);
             }
         }
 
@@ -379,8 +376,7 @@ public class RNGoogleSigninModule extends NativeGoogleSigninSpec {
             Activity activity = moduleInstance.getCurrentActivity();
             if (activity == null) {
                 moduleInstance.pendingAuthRecovery = null;
-                moduleInstance.promiseWrapper.reject(MODULE_NAME,
-                        "Cannot attempt recovery auth because app is not in foreground. "
+                moduleInstance.promiseWrapper.reject("Cannot attempt recovery auth because app is not in foreground. "
                                 + e.getLocalizedMessage());
             } else {
                 moduleInstance.pendingAuthRecovery = new PendingAuthRecovery(userProperties);
@@ -409,7 +405,7 @@ public class RNGoogleSigninModule extends NativeGoogleSigninSpec {
                 GoogleAuthUtil.clearToken(moduleInstance.getReactApplicationContext(), tokenToClear[0]);
                 moduleInstance.getPromiseWrapper().resolve(null);
             } catch (Exception e) {
-                moduleInstance.promiseWrapper.reject(MODULE_NAME, e);
+                moduleInstance.promiseWrapper.reject(e);
             }
             return null;
         }

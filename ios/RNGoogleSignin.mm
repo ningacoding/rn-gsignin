@@ -17,6 +17,10 @@ RCT_EXPORT_MODULE();
 static NSString *const PLAY_SERVICES_NOT_AVAILABLE = @"PLAY_SERVICES_NOT_AVAILABLE";
 static NSString *const ASYNC_OP_IN_PROGRESS = @"ASYNC_OP_IN_PROGRESS";
 
+static NSString *const NO_SAVED_CREDENTIAL_FOUND = @"NO_SAVED_CREDENTIAL_FOUND";
+static NSString *const ONE_TAP_START_FAILED = @"ONE_TAP_START_FAILED";
+
+
 
 // The key in `GoogleService-Info.plist` client id.
 // For more see https://developers.google.com/identity/sign-in/ios/start
@@ -31,7 +35,10 @@ static NSString *const kClientIdKey = @"CLIENT_ID";
            @"SIGN_IN_CANCELLED": [@(kGIDSignInErrorCodeCanceled) stringValue],
            @"SIGN_IN_REQUIRED": [@(kGIDSignInErrorCodeHasNoAuthInKeychain) stringValue],
            @"IN_PROGRESS": ASYNC_OP_IN_PROGRESS,
-           PLAY_SERVICES_NOT_AVAILABLE: PLAY_SERVICES_NOT_AVAILABLE // this never happens on iOS
+           // these never happen on iOS
+           PLAY_SERVICES_NOT_AVAILABLE: PLAY_SERVICES_NOT_AVAILABLE,
+           NO_SAVED_CREDENTIAL_FOUND: NO_SAVED_CREDENTIAL_FOUND,
+           ONE_TAP_START_FAILED: ONE_TAP_START_FAILED,
            };
 }
 
@@ -44,7 +51,11 @@ static NSString *const kClientIdKey = @"CLIENT_ID";
                   .SIGN_IN_CANCELLED = [@(kGIDSignInErrorCodeCanceled) stringValue],
                   .SIGN_IN_REQUIRED = [@(kGIDSignInErrorCodeHasNoAuthInKeychain) stringValue],
                   .IN_PROGRESS = ASYNC_OP_IN_PROGRESS,
-                  .PLAY_SERVICES_NOT_AVAILABLE = PLAY_SERVICES_NOT_AVAILABLE // this never happens on iOS
+              
+                  // these never happen on iOS
+                  .PLAY_SERVICES_NOT_AVAILABLE = PLAY_SERVICES_NOT_AVAILABLE,
+                  .NO_SAVED_CREDENTIAL_FOUND = NO_SAVED_CREDENTIAL_FOUND,
+                  .ONE_TAP_START_FAILED = ONE_TAP_START_FAILED,
           });
 }
 #endif
@@ -65,7 +76,7 @@ RCT_EXPORT_METHOD(configure:(NSDictionary *)options
   if (!options[@"iosClientId"] && !path) {
     NSString* message = @"RNGoogleSignin: failed to determine clientID - GoogleService-Info.plist was not found and iosClientId was not provided. To fix this error: if you have GoogleService-Info.plist file (usually downloaded from firebase) place it into the project as seen in the iOS guide. Otherwise pass iosClientId option to configure()";
     RCTLogError(@"%@", message);
-    reject(@"INTERNAL_MISSING_CONFIG", message, nil);
+    reject(@"configure", message, nil);
     return;
   }
 
@@ -78,7 +89,7 @@ RCT_EXPORT_METHOD(configure:(NSDictionary *)options
     if (error) {
       NSString* message = [NSString stringWithFormat:@"RNGoogleSignin: Failed to read GoogleService-Info.plist."];
       RCTLogError(@"%@", message);
-      reject(@"INTERNAL_PLIST_READ_ERR", message, error);
+      reject(@"configure", message, error);
       return;
     }
     clientId = plist[kClientIdKey];
@@ -263,7 +274,7 @@ RCT_EXPORT_METHOD(getTokens:(RCTPromiseResolveBlock)resolve
   }
 }
 
-+ (void)rejectWithSigninError: (NSError *) error withRejector: (RCTPromiseRejectBlock) rejector {
++ (void)rejectWithSigninError: (NSError *) error withRejector: (RCTPromiseRejectBlock) reject {
   NSString *errorMessage = @"Unknown error in google sign in.";
   switch (error.code) {
     case kGIDSignInErrorCodeUnknown:
@@ -288,9 +299,9 @@ RCT_EXPORT_METHOD(getTokens:(RCTPromiseResolveBlock)resolve
       errorMessage = @"There was an operation on a previous user.";
       break;
   }
-  NSString* message = [NSString stringWithFormat:@"RNGoogleSignInError: %@, %@", errorMessage, error.description];
+  NSString* message = [NSString stringWithFormat:@"RNGoogleSignIn: %@, %@", errorMessage, error.description];
   NSString* errorCode = [NSString stringWithFormat:@"%ld", error.code];
-  rejector(errorCode, message, error);
+  reject(errorCode, message, error);
 }
 
 #ifdef RCT_NEW_ARCH_ENABLED

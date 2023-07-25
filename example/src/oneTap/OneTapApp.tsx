@@ -22,8 +22,8 @@ import { OneTapUser } from '../../../src/OneTapSignIn';
 type ErrorWithCode = Error & { code?: string };
 
 type State = {
-  error?: ErrorWithCode;
-  userInfo?: OneTapUser;
+  userInfo: OneTapUser | undefined;
+  error: ErrorWithCode | undefined;
 };
 
 const prettyJson = (value: any) => {
@@ -89,7 +89,10 @@ export default class GoogleSigninSampleApp extends Component<{}, State> {
     const { error } = this.state;
     if (error !== undefined) {
       // @ts-ignore
-      const text = `${error.toString()} ${error.code ? error.code : ''}`;
+      const text = `${error.toString()} ${
+        // @ts-ignore
+        error.code ? `code: ${error.code}` : ''
+      }`;
       return (
         <Text selectable style={{ color: 'black' }}>
           {text}
@@ -108,6 +111,7 @@ export default class GoogleSigninSampleApp extends Component<{}, State> {
     } catch (error) {
       const typedError = error as NativeModuleError;
       Alert.alert('Something went wrong', typedError.toString());
+      this.setState({ error: typedError });
     }
   };
 
@@ -122,7 +126,7 @@ export default class GoogleSigninSampleApp extends Component<{}, State> {
 
       switch (typedError.code) {
         case statusCodes.NO_SAVED_CREDENTIAL_FOUND: {
-          this._createAccount();
+          Alert.alert('no saved credential found, try creating an account');
           break;
         }
         case statusCodes.SIGN_IN_CANCELLED:
@@ -139,10 +143,10 @@ export default class GoogleSigninSampleApp extends Component<{}, State> {
           break;
         default:
           Alert.alert('Something went wrong', typedError.toString());
-          this.setState({
-            error: typedError,
-          });
       }
+      this.setState({
+        error: typedError,
+      });
     }
   };
 

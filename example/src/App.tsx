@@ -14,8 +14,8 @@ import {
   GoogleSigninButton,
   NativeModuleError,
   statusCodes,
+  User,
 } from '@react-native-google-signin/google-signin';
-import type { User } from '@react-native-google-signin/google-signin';
 // @ts-ignore see docs/CONTRIBUTING.md for details
 import config from './config';
 import { TokenClearingView } from './TokenClearingView';
@@ -23,8 +23,8 @@ import { TokenClearingView } from './TokenClearingView';
 type ErrorWithCode = Error & { code?: string };
 
 type State = {
-  error?: ErrorWithCode;
-  userInfo?: User;
+  userInfo: User | undefined;
+  error: ErrorWithCode | undefined;
 };
 
 const prettyJson = (value: any) => {
@@ -142,6 +142,10 @@ export default class GoogleSigninSampleApp extends Component<{}, State> {
             const tokens = await GoogleSignin.getTokens();
             Alert.alert('tokens', prettyJson(tokens));
           } catch (error) {
+            const typedError = error as NativeModuleError;
+            this.setState({
+              error: typedError,
+            });
             Alert.alert('error', String(error));
           }
         }}
@@ -178,7 +182,10 @@ export default class GoogleSigninSampleApp extends Component<{}, State> {
     const { error } = this.state;
     if (error !== undefined) {
       // @ts-ignore
-      const text = `${error.toString()} ${error.code ? error.code : ''}`;
+      const text = `${error.toString()} ${
+        // @ts-ignore
+        error.code ? `code: ${error.code}` : ''
+      }`;
       return (
         <Text selectable style={{ color: 'black' }}>
           {text}
@@ -203,7 +210,10 @@ export default class GoogleSigninSampleApp extends Component<{}, State> {
           break;
         case statusCodes.IN_PROGRESS:
           // operation (eg. sign in) already in progress
-          Alert.alert('in progress');
+          Alert.alert(
+            'in progress',
+            'operation (eg. sign in) already in progress',
+          );
           break;
         case statusCodes.PLAY_SERVICES_NOT_AVAILABLE:
           // android only
@@ -211,10 +221,10 @@ export default class GoogleSigninSampleApp extends Component<{}, State> {
           break;
         default:
           Alert.alert('Something went wrong', typedError.toString());
-          this.setState({
-            error: typedError,
-          });
       }
+      this.setState({
+        error: typedError,
+      });
     }
   };
 

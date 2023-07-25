@@ -18,15 +18,14 @@ import com.google.android.gms.auth.api.identity.BeginSignInRequest;
 import com.google.android.gms.auth.api.identity.Identity;
 import com.google.android.gms.auth.api.identity.SignInClient;
 import com.google.android.gms.auth.api.identity.SignInCredential;
-import com.google.android.gms.auth.api.signin.GoogleSignInStatusCodes;
 import com.google.android.gms.common.api.ApiException;
+import com.google.android.gms.common.api.CommonStatusCodes;
 
 @ReactModule(name = NativeOneTapSignInSpec.NAME)
 public class RNOneTapSignInModule extends NativeOneTapSignInSpec {
     private static final int REQ_ONE_TAP = 2;
-
     private SignInClient oneTapClient;
-    private PromiseWrapper promiseWrapper = new PromiseWrapper();
+    private PromiseWrapper promiseWrapper = new PromiseWrapper(RNOneTapSignInModule.NAME);
 
     public RNOneTapSignInModule(final ReactApplicationContext reactContext) {
         super(reactContext);
@@ -55,15 +54,24 @@ public class RNOneTapSignInModule extends NativeOneTapSignInSpec {
                         null, 0, 0, 0);
                 } catch (IntentSender.SendIntentException e) {
                     Log.e(NativeOneTapSignInSpec.NAME, "Couldn't start One Tap UI: " + e.getLocalizedMessage());
-                    promiseWrapper.reject(ONE_TAP_START_FAILED, e);
+                    promiseWrapper.reject(() -> new ErrorDto(ONE_TAP_START_FAILED, e.getLocalizedMessage()));
                 }
             })
             .addOnFailureListener(activity, e -> {
-                // No saved credentials found. Launch the One Tap sign-up flow, or
-                // do nothing and continue presenting the signed-out UI.
-                promiseWrapper.reject(NO_SAVED_CREDENTIAL_FOUND, e);
+                promiseWrapper.reject(() -> {
+                    if (e instanceof ApiException) {
+                        ApiException exception = (ApiException) e;
+                        int code = exception.getStatusCode();
+                        String message = e.getMessage();
+                        if (code == CommonStatusCodes.CANCELED && message != null && message.toLowerCase().contains("cannot find a matching credential.")) {
+                            // rate limiting also returns this error code
+                            return new ErrorDto(NO_SAVED_CREDENTIAL_FOUND, e.getLocalizedMessage());
+                        }
+                    }
+                    // handles rate limiting and other errors
+                    return new ErrorDto(e, "signIn");
+                });
             });
-
     }
 
     @Override
@@ -79,7 +87,7 @@ public class RNOneTapSignInModule extends NativeOneTapSignInSpec {
     private class RNOneTapSigninActivityEventListener extends BaseActivityEventListener {
         @Override
         public void onActivityResult(Activity activity, final int requestCode, final int resultCode, final Intent intent) {
-             if (requestCode == REQ_ONE_TAP) {
+            if (requestCode == REQ_ONE_TAP) {
                 handleOneTapSignInResult(intent);
             }
         }
@@ -91,10 +99,7 @@ public class RNOneTapSignInModule extends NativeOneTapSignInSpec {
             WritableMap userParams = getUserProperties(credential);
             promiseWrapper.resolve(userParams);
         } catch (ApiException e) {
-            // TODO dupe
-            int code = e.getStatusCode();
-            String errorDescription = GoogleSignInStatusCodes.getStatusCodeString(code);
-            promiseWrapper.reject(String.valueOf(code), errorDescription);
+            promiseWrapper.reject(e);
         }
     }
 }
