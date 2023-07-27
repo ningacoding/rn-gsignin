@@ -1,15 +1,23 @@
 package com.reactnativegooglesignin;
 
+import static com.reactnativegooglesignin.SigninButtonEvent.EVENT_NAME;
+
+import android.view.View;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.facebook.react.bridge.ReactContext;
+import com.facebook.react.common.MapBuilder;
 import com.facebook.react.module.annotations.ReactModule;
-import com.facebook.react.modules.core.DeviceEventManagerModule;
-import com.facebook.react.uimanager.ViewManagerDelegate;
-import com.facebook.react.uimanager.annotations.ReactProp;
 import com.facebook.react.uimanager.SimpleViewManager;
 import com.facebook.react.uimanager.ThemedReactContext;
+import com.facebook.react.uimanager.UIManagerHelper;
+import com.facebook.react.uimanager.ViewManagerDelegate;
+import com.facebook.react.uimanager.annotations.ReactProp;
 import com.google.android.gms.common.SignInButton;
+
+import java.util.Map;
 
 @ReactModule(name = RNGoogleSigninButtonViewManager.MODULE_NAME)
 public class RNGoogleSigninButtonViewManager extends SimpleViewManager<SignInButton> implements RNGoogleSigninButtonManagerInterface<SignInButton> {
@@ -17,6 +25,27 @@ public class RNGoogleSigninButtonViewManager extends SimpleViewManager<SignInBut
     public static final String MODULE_NAME = "RNGoogleSigninButton";
     private final ViewManagerDelegate<SignInButton> mDelegate;
 
+    private static final View.OnClickListener mOnClickListener = button -> {
+        ReactContext reactContext = (ReactContext) button.getContext();
+
+        int reactTag = button.getId();
+        UIManagerHelper.getEventDispatcherForReactTag(reactContext, reactTag)
+            .dispatchEvent(
+                new SigninButtonEvent(UIManagerHelper.getSurfaceId(reactContext), reactTag));
+    };
+
+    @Override
+    public Map<String, Object> getExportedCustomBubblingEventTypeConstants() {
+        return MapBuilder.<String, Object>builder().put(
+            EVENT_NAME,
+            MapBuilder.of(
+                "phasedRegistrationNames",
+                MapBuilder.of("bubbled", "onPress")
+            )
+        ).build();
+    }
+
+    @NonNull
     @Override
     public String getName() {
         return MODULE_NAME;
@@ -36,12 +65,18 @@ public class RNGoogleSigninButtonViewManager extends SimpleViewManager<SignInBut
         }
     }
 
+    @NonNull
     @Override
     protected SignInButton createViewInstance(@NonNull final ThemedReactContext reactContext) {
         SignInButton button = new SignInButton(reactContext);
-        button.setOnClickListener(v -> reactContext.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class).emit("RNGoogleSigninButtonClicked", null));
         return button;
     }
+
+    @Override
+    protected void addEventEmitters(@NonNull final ThemedReactContext reactContext, final SignInButton view) {
+        view.setOnClickListener(mOnClickListener);
+    }
+
     @Override
     @ReactProp(name = "size")
     public void setSize(SignInButton button, int size) {

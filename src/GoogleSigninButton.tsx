@@ -1,11 +1,6 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 
-import {
-  Platform,
-  DeviceEventEmitter,
-  StyleSheet,
-  useColorScheme,
-} from 'react-native';
+import { StyleSheet, useColorScheme } from 'react-native';
 import type { GoogleSigninButtonProps } from './types';
 import RNGoogleSigninButton from './spec/SignInButtonNativeComponent';
 import { NativeModule } from './spec/NativeGoogleSignin';
@@ -20,21 +15,6 @@ export const GoogleSigninButton = ({
   size = BUTTON_SIZE_STANDARD,
   ...rest
 }: GoogleSigninButtonProps) => {
-  useEffect(() => {
-    if (Platform.OS === 'ios') {
-      return;
-    }
-    const clickListener = DeviceEventEmitter.addListener(
-      'RNGoogleSigninButtonClicked',
-      () => {
-        onPress?.();
-      },
-    );
-    return () => {
-      clickListener.remove();
-    };
-  }, [onPress]);
-
   const activeColorScheme = useColorScheme();
   const usedColor = color ?? activeColorScheme ?? 'light';
 
