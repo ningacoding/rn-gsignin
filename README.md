@@ -86,7 +86,7 @@ This is the easiest way to implement Google Sign In. It is a one-tap sign in flo
 
 Please read the official docs [here](https://developers.google.com/identity/one-tap/android/overview).
 
-With the One Tap sign in, you need to keep track of the user state. I.e. there are no `hasPreviousSignIn` or `getCurrentUser` methods.
+With the One Tap sign in, you can combine the one-tap methods with those one from the legacy sign in, i.e. you can use the One Tap sign in to sign in the user and then call `getCurrentUser` to get the user data.
 
 #### `signIn`
 
