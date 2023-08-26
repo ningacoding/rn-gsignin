@@ -13,11 +13,17 @@ import {
   GoogleOneTapSignIn,
   NativeModuleError,
   statusCodes,
+  OneTapUser,
+  GoogleSignin,
 } from '@react-native-google-signin/google-signin';
 import type { User } from '@react-native-google-signin/google-signin';
 // @ts-ignore see docs/CONTRIBUTING.md for details
 import config from '../config';
-import { OneTapUser } from '../../../src/OneTapSignIn';
+import {
+  configureGoogleSignIn,
+  PROFILE_IMAGE_SIZE,
+  RenderError,
+} from '../components';
 
 type ErrorWithCode = Error & { code?: string };
 
@@ -29,7 +35,6 @@ type State = {
 const prettyJson = (value: any) => {
   return JSON.stringify(value, null, 2);
 };
-const PROFILE_IMAGE_SIZE = 150;
 
 export default class GoogleSigninSampleApp extends Component<{}, State> {
   state = {
@@ -51,8 +56,33 @@ export default class GoogleSigninSampleApp extends Component<{}, State> {
     return (
       <SafeAreaView style={[styles.pageContainer]}>
         <ScrollView contentContainerStyle={styles.container}>
+          <Button
+            onPress={async () => {
+              configureGoogleSignIn();
+              await GoogleSignin.signInSilently();
+              Alert.alert('done');
+            }}
+            title="sign in silently"
+          />
+          <Button
+            onPress={async () => {
+              const hasPreviousSignIn = GoogleSignin.hasPreviousSignIn();
+              Alert.alert(String(hasPreviousSignIn));
+            }}
+            title="is there a user signed in?"
+          />
+          <Button
+            onPress={async () => {
+              const userInfo = GoogleSignin.getCurrentUser();
+              Alert.alert(
+                'current user',
+                userInfo ? prettyJson(userInfo) : 'null',
+              );
+            }}
+            title="get current user"
+          />
           {body}
-          {this.renderError()}
+          <RenderError error={this.state.error} />
         </ScrollView>
       </SafeAreaView>
     );
@@ -83,23 +113,6 @@ export default class GoogleSigninSampleApp extends Component<{}, State> {
         <Button onPress={this._signOut} title="Log out" />
       </View>
     );
-  }
-
-  renderError() {
-    const { error } = this.state;
-    if (error !== undefined) {
-      // @ts-ignore
-      const text = `${error.toString()} ${
-        // @ts-ignore
-        error.code ? `code: ${error.code}` : ''
-      }`;
-      return (
-        <Text selectable style={{ color: 'black' }}>
-          {text}
-        </Text>
-      );
-    }
-    return null;
   }
 
   _createAccount = async () => {

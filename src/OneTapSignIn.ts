@@ -1,5 +1,4 @@
-import { OneTapNativeModule } from './spec/NativeOneTapSignIn.android';
-import { Platform } from 'react-native';
+import { OneTapNativeModule } from './spec/NativeOneTapSignIn';
 
 export type OneTapSignInParams = {
   webClientId: string;
@@ -29,14 +28,7 @@ type TokenOrPassword =
       password: string;
     };
 
-const unsupportedPlatformError = new Error(
-  'OneTapSignIn is now only available on Android',
-);
-
 const signIn = (params: OneTapSignInParams): Promise<OneTapUser> => {
-  if (Platform.OS !== 'android') {
-    return Promise.reject(unsupportedPlatformError);
-  }
   return OneTapNativeModule.signIn({
     autoSignIn: true,
     filterByAuthorizedAccounts: true,
@@ -46,9 +38,6 @@ const signIn = (params: OneTapSignInParams): Promise<OneTapUser> => {
   }) as Promise<OneTapUser>;
 };
 const createAccount = (params: OneTapSignInParams): Promise<OneTapUser> => {
-  if (Platform.OS !== 'android') {
-    return Promise.reject(unsupportedPlatformError);
-  }
   return OneTapNativeModule.signIn({
     autoSignIn: false,
     filterByAuthorizedAccounts: false,
@@ -60,11 +49,6 @@ const createAccount = (params: OneTapSignInParams): Promise<OneTapUser> => {
 
 export const GoogleOneTapSignIn = {
   signIn,
-  signOut: (): Promise<null> => {
-    if (Platform.OS !== 'android') {
-      return Promise.reject(unsupportedPlatformError);
-    }
-    return OneTapNativeModule.signOut();
-  },
+  signOut: OneTapNativeModule.signOut,
   createAccount,
 };

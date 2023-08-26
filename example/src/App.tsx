@@ -16,9 +16,16 @@ import {
   statusCodes,
   User,
 } from '@react-native-google-signin/google-signin';
-// @ts-ignore see docs/CONTRIBUTING.md for details
-import config from './config';
+
 import { TokenClearingView } from './TokenClearingView';
+import {
+  configureGoogleSignIn,
+  prettyJson,
+  PROFILE_IMAGE_SIZE,
+  RenderError,
+  RenderGetCurrentUser,
+  RenderHasPreviousSignIn,
+} from './components';
 
 type ErrorWithCode = Error & { code?: string };
 
@@ -27,11 +34,6 @@ type State = {
   error: ErrorWithCode | undefined;
 };
 
-const prettyJson = (value: any) => {
-  return JSON.stringify(value, null, 2);
-};
-const PROFILE_IMAGE_SIZE = 150;
-
 export default class GoogleSigninSampleApp extends Component<{}, State> {
   state = {
     userInfo: undefined,
@@ -39,16 +41,8 @@ export default class GoogleSigninSampleApp extends Component<{}, State> {
   };
 
   async componentDidMount() {
-    this._configureGoogleSignIn();
+    configureGoogleSignIn();
     await this._getCurrentUser();
-  }
-
-  _configureGoogleSignIn() {
-    GoogleSignin.configure({
-      webClientId: config.webClientId,
-      offlineAccess: false,
-      profileImageSize: PROFILE_IMAGE_SIZE,
-    });
   }
 
   async _getCurrentUser() {
@@ -83,38 +77,14 @@ export default class GoogleSigninSampleApp extends Component<{}, State> {
     return (
       <SafeAreaView style={[styles.pageContainer]}>
         <ScrollView contentContainerStyle={styles.container}>
-          {this.renderHasPreviousSignIn()}
+          <RenderHasPreviousSignIn />
           {this.renderAddScopes()}
-          {this.renderGetCurrentUser()}
+          <RenderGetCurrentUser />
           {this.renderGetTokens()}
           {body}
-          {this.renderError()}
+          <RenderError error={this.state.error} />
         </ScrollView>
       </SafeAreaView>
-    );
-  }
-
-  renderHasPreviousSignIn() {
-    return (
-      <Button
-        onPress={async () => {
-          const hasPreviousSignIn = GoogleSignin.hasPreviousSignIn();
-          Alert.alert(String(hasPreviousSignIn));
-        }}
-        title="is there a user signed in?"
-      />
-    );
-  }
-
-  renderGetCurrentUser() {
-    return (
-      <Button
-        onPress={async () => {
-          const userInfo = await GoogleSignin.getCurrentUser();
-          Alert.alert('current user', userInfo ? prettyJson(userInfo) : 'null');
-        }}
-        title="get current user"
-      />
     );
   }
 
@@ -176,23 +146,6 @@ export default class GoogleSigninSampleApp extends Component<{}, State> {
         <Button onPress={this._signOut} title="Log out" />
       </View>
     );
-  }
-
-  renderError() {
-    const { error } = this.state;
-    if (error !== undefined) {
-      // @ts-ignore
-      const text = `${error.toString()} ${
-        // @ts-ignore
-        error.code ? `code: ${error.code}` : ''
-      }`;
-      return (
-        <Text selectable style={{ color: 'black' }}>
-          {text}
-        </Text>
-      );
-    }
-    return null;
   }
 
   _signIn = async () => {
