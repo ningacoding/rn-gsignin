@@ -28,7 +28,10 @@ def safeExtGet(prop, fallback) {
 }
 
 android {
-  namespace = 'com.reactnativegooglesignin'
+  def agpVersion = com.android.Version.ANDROID_GRADLE_PLUGIN_VERSION
+  if (agpVersion.tokenize('.')[0].toInteger() >= 7) {
+    namespace "com.reactnativegooglesignin"
+  }
   compileSdkVersion getExtOrIntegerDefault('compileSdkVersion')
 
   // Used to override the NDK path/version on internal CI or by allowing
@@ -66,5 +69,8 @@ repositories {
 dependencies {
   //noinspection GradleDynamicVersion
   implementation "com.facebook.react:react-native:+"  // From node_modules
-  implementation "com.google.android.gms:play-services-auth:${safeExtGet('googlePlayServicesAuthVersion', '20.6.0')}"
+  implementation "com.google.android.gms:play-services-auth:${safeExtGet('googlePlayServicesAuthVersion', '20.7.0')}"
+  // while we could parse the token on JS side, we would need to polyfill atob to do that.
+  // it ends up being easier to do it on native side.
+  implementation 'com.auth0.android:jwtdecode:2.0.2'
 }

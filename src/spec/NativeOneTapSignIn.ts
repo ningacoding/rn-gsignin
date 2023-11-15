@@ -1,14 +1,12 @@
 import type { Spec } from './NativeOneTapSignIn.android';
 
-const unsupportedPlatformError = new Error(
-  'OneTapSignIn is now only available on Android',
-);
+const unsupportedError = new Error('unsupported call');
 
 export const OneTapNativeModule: Spec = {
   signIn(_params: Object): Promise<Object> {
-    return Promise.reject(unsupportedPlatformError);
+    return Promise.reject(unsupportedError);
   },
   signOut(): Promise<null> {
-    return Promise.reject(unsupportedPlatformError);
+    return Promise.reject(unsupportedError);
   },
 };

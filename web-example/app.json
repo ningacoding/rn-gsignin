@@ -1,0 +1,9 @@
+{
+  "expo": {
+    "web": {
+      "bundler": "metro"
+    },
+    "name": "web-example-google-signin",
+    "slug": "web-example-google-signin"
+  }
+}

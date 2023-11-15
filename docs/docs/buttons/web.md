@@ -1,0 +1,32 @@
+# WebGoogleSigninButton
+
+This is the sign in button that you can use in Web apps. It renders `null` when used in native apps.
+It has a slightly different API than the native `GoogleSigninButton` component which is why it exists as a separate component.
+
+The button will _not render_ before the [Google Client API has been loaded](../setting-up/web).
+
+```tsx
+import { WebGoogleSigninButton } from '@react-native-google-signin/google-signin';
+
+<WebGoogleSigninButton
+  webClientId={config.webClientId}
+  onPress={() => {
+    // initiate sign in
+  }}
+/>;
+```
+
+## Props
+
+| Name             | Type                                                                  | Description                                                |
+| ---------------- | --------------------------------------------------------------------- | ---------------------------------------------------------- |
+| `webClientId`    | `string`                                                              | Required. The web client ID.                               |
+| `onPress?`       | `() => void`                                                          | Optional. The function to call when the button is pressed. |
+| `type?`          | `"standard"` \| `"icon"`                                              | Optional. The type of the sign-in button.                  |
+| `theme?`         | `"outline"` \| `"filled_blue"` \| `"filled_black"`                    | Optional. The theme of the sign-in button.                 |
+| `size?`          | `"large"` \| `"medium"` \| `"small"`                                  | Optional. The size of the sign-in button.                  |
+| `text?`          | `"signin_with"` \| `"signup_with"` \| `"continue_with"` \| `"signin"` | Optional. The text to display on the sign-in button.       |
+| `shape?`         | `"rectangular"` \| `"pill"` \| `"circle"` \| `"square"`               | Optional. The shape of the sign-in button.                 |
+| `width?`         | `number`                                                              | Optional. The width of the sign-in button.                 |
+| `locale?`        | `string`                                                              | Optional. The locale for the sign-in button.               |
+| `logoAlignment?` | `"left"` \| `"center"`                                                | Optional. The alignment of the logo on the button.         |

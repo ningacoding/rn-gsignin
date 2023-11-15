@@ -3,11 +3,11 @@ import {
   StyleSheet,
   Text,
   View,
-  Alert,
   Button,
   Image,
   ScrollView,
   SafeAreaView,
+  Platform,
 } from 'react-native';
 import {
   GoogleOneTapSignIn,
@@ -15,10 +15,12 @@ import {
   statusCodes,
   OneTapUser,
   GoogleSignin,
+  WebGoogleSigninButton,
+  OneTapSignInParams,
+  GoogleSigninButton,
 } from '@react-native-google-signin/google-signin';
-import type { User } from '@react-native-google-signin/google-signin';
 // @ts-ignore see docs/CONTRIBUTING.md for details
-import config from '../config';
+import config from '../config/config';
 import {
   configureGoogleSignIn,
   PROFILE_IMAGE_SIZE,
@@ -36,8 +38,8 @@ const prettyJson = (value: any) => {
   return JSON.stringify(value, null, 2);
 };
 
-export default class GoogleSigninSampleApp extends Component<{}, State> {
-  state = {
+export class OneTapApp extends Component<{}, State> {
+  state: State = {
     userInfo: undefined,
     error: undefined,
   };
@@ -49,38 +51,52 @@ export default class GoogleSigninSampleApp extends Component<{}, State> {
       this.renderUserInfo(userInfo)
     ) : (
       <>
-        <Button onPress={this._signIn} title="Sign in with One-tap!" />
+        <WebGoogleSigninButton
+          webClientId={config.webClientId}
+          onPress={() => {
+            this._signIn();
+          }}
+        />
+        <GoogleSigninButton
+          color={GoogleSigninButton.Color.Dark}
+          onPress={() => {
+            this._signIn();
+          }}
+        />
         <Button onPress={this._createAccount} title="Sign up with One-tap!" />
       </>
     );
     return (
       <SafeAreaView style={[styles.pageContainer]}>
         <ScrollView contentContainerStyle={styles.container}>
-          <Button
-            onPress={async () => {
-              configureGoogleSignIn();
-              await GoogleSignin.signInSilently();
-              Alert.alert('done');
-            }}
-            title="sign in silently"
-          />
-          <Button
-            onPress={async () => {
-              const hasPreviousSignIn = GoogleSignin.hasPreviousSignIn();
-              Alert.alert(String(hasPreviousSignIn));
-            }}
-            title="is there a user signed in?"
-          />
-          <Button
-            onPress={async () => {
-              const userInfo = GoogleSignin.getCurrentUser();
-              Alert.alert(
-                'current user',
-                userInfo ? prettyJson(userInfo) : 'null',
-              );
-            }}
-            title="get current user"
-          />
+          {Platform.OS !== 'web' && (
+            <>
+              <Button
+                onPress={async () => {
+                  configureGoogleSignIn();
+                  await GoogleSignin.signInSilently();
+                  alert('done');
+                }}
+                title="sign in silently"
+              />
+              <Button
+                onPress={async () => {
+                  const hasPreviousSignIn = GoogleSignin.hasPreviousSignIn();
+                  alert(String(hasPreviousSignIn));
+                }}
+                title="is there a user signed in?"
+              />
+              <Button
+                onPress={async () => {
+                  const userInfo = GoogleSignin.getCurrentUser();
+                  alert(
+                    'current user' + userInfo ? prettyJson(userInfo) : 'null',
+                  );
+                }}
+                title="get current user"
+              />
+            </>
+          )}
           {body}
           <RenderError error={this.state.error} />
         </ScrollView>
@@ -88,7 +104,7 @@ export default class GoogleSigninSampleApp extends Component<{}, State> {
     );
   }
 
-  renderUserInfo(userInfo: User) {
+  renderUserInfo(userInfo: OneTapUser) {
     return (
       <View style={styles.container}>
         <Text style={styles.welcomeText}>Welcome, {userInfo.user.name}</Text>
@@ -96,11 +112,12 @@ export default class GoogleSigninSampleApp extends Component<{}, State> {
           Your user info:{' '}
           {prettyJson({
             ...userInfo,
-            idToken: `${userInfo.idToken?.slice(0, 5)}...`,
             user: {
               ...userInfo.user,
+              id: userInfo.user.id.slice(0, 5) + '...',
               photo: `${userInfo.user.photo?.slice(0, 5)}...`,
             },
+            idToken: `${userInfo.idToken?.slice(0, 5)}...`,
           })}
         </Text>
         {userInfo.user.photo && (
@@ -123,39 +140,47 @@ export default class GoogleSigninSampleApp extends Component<{}, State> {
       this.setState({ userInfo, error: undefined });
     } catch (error) {
       const typedError = error as NativeModuleError;
-      Alert.alert('Something went wrong', typedError.toString());
+      alert('Something went wrong' + typedError.toString());
       this.setState({ error: typedError });
     }
   };
 
-  _signIn = async () => {
+  _signIn = async (extraParams?: Omit<OneTapSignInParams, 'webClientId'>) => {
     try {
       const userInfo = await GoogleOneTapSignIn.signIn({
         webClientId: config.webClientId,
+        ...extraParams,
       });
+
       this.setState({ userInfo, error: undefined });
     } catch (error) {
       const typedError = error as NativeModuleError;
 
       switch (typedError.code) {
         case statusCodes.NO_SAVED_CREDENTIAL_FOUND: {
-          Alert.alert('no saved credential found, try creating an account');
+          alert('no saved credential found, try creating an account');
           break;
         }
         case statusCodes.SIGN_IN_CANCELLED:
           // sign in was cancelled
-          Alert.alert('cancelled');
+          alert('cancelled');
           break;
         case statusCodes.IN_PROGRESS:
           // operation (eg. sign in) already in progress
-          Alert.alert('in progress');
+          alert('in progress');
+          break;
+        case statusCodes.ONE_TAP_START_FAILED:
+          // Android and Web only
+          alert(
+            'failed to present one tap UI, maybe because user closed the popup previously?',
+          );
           break;
         case statusCodes.PLAY_SERVICES_NOT_AVAILABLE:
           // android only
-          Alert.alert('play services not available or outdated');
+          alert('play services not available or outdated');
           break;
         default:
-          Alert.alert('Something went wrong', typedError.toString());
+          alert('Something went wrong' + typedError.toString());
       }
       this.setState({
         error: typedError,
@@ -165,9 +190,13 @@ export default class GoogleSigninSampleApp extends Component<{}, State> {
 
   _signOut = async () => {
     try {
-      await GoogleOneTapSignIn.signOut();
+      const { userInfo } = this.state;
 
-      this.setState({ userInfo: undefined, error: undefined });
+      if (userInfo) {
+        await GoogleOneTapSignIn.signOut(userInfo.user.id);
+
+        this.setState({ userInfo: undefined, error: undefined });
+      }
     } catch (error) {
       const typedError = error as NativeModuleError;
 

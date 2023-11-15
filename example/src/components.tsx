@@ -2,7 +2,7 @@ import { Alert, Button, Text } from 'react-native';
 import { GoogleSignin } from '@react-native-google-signin/google-signin';
 import React from 'react';
 // @ts-ignore see docs/CONTRIBUTING.md for details
-import config from './config';
+import config from './config/config';
 
 export const prettyJson = (value: any) => {
   return JSON.stringify(value, null, 2);

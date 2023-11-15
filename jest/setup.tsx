@@ -1,8 +1,14 @@
 import React from 'react';
 import { Pressable, Text } from 'react-native';
-import type { User, GoogleSigninButtonProps } from '../src/types';
-import type { GoogleSigninSingleton } from '../src/GoogleSignin';
-import type { GoogleSigninButton } from '../src';
+import type {
+  GoogleSigninButton,
+  GoogleSigninButtonProps,
+  WebGoogleSignInButtonProps,
+  User,
+} from '../src';
+import type { OneTapUser, statusCodes } from '../src';
+import type { OneTapSignInModule } from '../src/oneTap/types';
+import type { GoogleSignin } from '../src/signIn/GoogleSignin.web';
 
 export const mockUserInfo: User = {
   idToken: 'mockIdToken',
@@ -31,14 +37,18 @@ MockGoogleSigninButton.Color = { Dark: 'dark', Light: 'light' } as const;
 const MockGoogleSigninButtonTyped: typeof GoogleSigninButton =
   MockGoogleSigninButton;
 
-const mockStatusCodes = Object.freeze({
+const mockStatusCodesRaw: typeof statusCodes = {
   SIGN_IN_CANCELLED: 'mock_SIGN_IN_CANCELLED',
   IN_PROGRESS: 'mock_IN_PROGRESS',
   PLAY_SERVICES_NOT_AVAILABLE: 'mock_PLAY_SERVICES_NOT_AVAILABLE',
   SIGN_IN_REQUIRED: 'mock_SIGN_IN_REQUIRED',
-} as const);
+  ONE_TAP_START_FAILED: 'mock_ONE_TAP_START_FAILED',
+  NO_SAVED_CREDENTIAL_FOUND: 'mock_NO_SAVED_CREDENTIAL_FOUND',
+};
 
-const mockGoogleSignin: typeof GoogleSigninSingleton = {
+const mockStatusCodes = Object.freeze(mockStatusCodesRaw);
+
+const mockGoogleSignin: typeof GoogleSignin = {
   configure: jest.fn(),
   hasPlayServices: jest.fn().mockResolvedValue(true),
   getTokens: jest.fn().mockResolvedValue({
@@ -55,9 +65,44 @@ const mockGoogleSignin: typeof GoogleSigninSingleton = {
   clearCachedAccessToken: jest.fn().mockResolvedValue(null),
 };
 
-// TODO @vonovak mock closer to native level
-jest.mock('@react-native-google-signin/google-signin', () => ({
+type ExportedModuleType = typeof import('../src/index');
+
+const MockWebGoogleSigninButton = (props: WebGoogleSignInButtonProps) => {
+  return (
+    <Pressable {...props}>
+      <Text>Mock Web Sign in with Google</Text>
+    </Pressable>
+  );
+};
+
+export const mockOneTapUserInfo: OneTapUser = {
+  user: {
+    email: 'mockEmail',
+    id: 'mockId',
+    givenName: 'mockGivenName',
+    familyName: 'mockFamilyName',
+    photo: null,
+    name: 'mockFullName',
+  },
+  idToken: 'mockIdToken',
+  password: null,
+  credentialOrigin: 'user',
+};
+const mockSignIn = jest.fn().mockResolvedValue(mockOneTapUserInfo);
+
+const mockGoogleOneTapSignIn: OneTapSignInModule = {
+  signOut: jest.fn().mockResolvedValue(null),
+  signIn: mockSignIn,
+  createAccount: mockSignIn,
+};
+
+// TODO @vonovak mock closer to native level?
+const mockModule: ExportedModuleType = Object.freeze({
   statusCodes: mockStatusCodes,
   GoogleSignin: mockGoogleSignin,
   GoogleSigninButton: MockGoogleSigninButtonTyped,
-}));
+  WebGoogleSigninButton: MockWebGoogleSigninButton,
+  GoogleOneTapSignIn: mockGoogleOneTapSignIn,
+});
+
+jest.mock('@react-native-google-signin/google-signin', () => mockModule);

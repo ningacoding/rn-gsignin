@@ -3,6 +3,7 @@ package com.reactnativegooglesignin;
 import android.net.Uri;
 import androidx.annotation.NonNull;
 
+import com.auth0.android.jwt.JWT;
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.bridge.ReadableMap;
@@ -56,9 +57,12 @@ public class Utils {
 
     static WritableMap getUserProperties(@NonNull SignInCredential acct) {
         Uri photoUrl = acct.getProfilePictureUri();
+        String idToken = acct.getGoogleIdToken();
+        String email = idToken == null ? null : acct.getId();
 
         WritableMap user = Arguments.createMap();
-        user.putString("id", acct.getId());
+        user.putString("id", getSubjectId(acct));
+        user.putString("email", email);
         user.putString("name", acct.getDisplayName());
         user.putString("givenName", acct.getGivenName());
         user.putString("familyName", acct.getFamilyName());
@@ -66,10 +70,23 @@ public class Utils {
 
         WritableMap params = Arguments.createMap();
         params.putMap("user", user);
-        params.putString("idToken", acct.getGoogleIdToken());
+        params.putString("idToken", idToken);
         params.putString("password", acct.getPassword());
+        // credentialOrigin is not available on the Android side and is added for compatibility with web
+        params.putString("credentialOrigin", "user");
 
         return params;
+    }
+
+    static String getSubjectId(@NonNull SignInCredential acct) {
+        try {
+          String token = acct.getGoogleIdToken();
+          assert token != null;
+          JWT jwt = new JWT(token);
+          return jwt.getSubject();
+        } catch (Exception e) {
+          return acct.getId();
+        }
     }
 
     static GoogleSignInOptions getSignInOptions(

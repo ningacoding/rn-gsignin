@@ -34,7 +34,7 @@ type State = {
   error: ErrorWithCode | undefined;
 };
 
-export default class GoogleSigninSampleApp extends Component<{}, State> {
+export class GoogleSigninSampleApp extends Component<{}, State> {
   state = {
     userInfo: undefined,
     error: undefined,

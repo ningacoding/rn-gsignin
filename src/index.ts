@@ -1,15 +1,14 @@
+export { GoogleSignin } from './signIn/GoogleSignin';
+export { statusCodes } from './errors/errorCodes';
+
 export {
-  GoogleSigninSingleton as GoogleSignin,
-  statusCodes,
-} from './GoogleSignin';
-export { GoogleSigninButton } from './GoogleSigninButton';
+  GoogleSigninButton,
+  type GoogleSigninButtonProps,
+} from './buttons/GoogleSigninButton';
+export {
+  WebGoogleSigninButton,
+  type WebGoogleSignInButtonProps,
+} from './buttons/WebGoogleSigninButton';
 export * from './types';
-export type {
-  ConfigureParams,
-  SignInParams,
-  GetTokensResponse,
-  AddScopesParams,
-  HasPlayServicesParams,
-} from './spec/NativeGoogleSignin';
-export { GoogleOneTapSignIn } from './OneTapSignIn';
-export type { OneTapUser, OneTapSignInParams } from './OneTapSignIn';
+export { GoogleOneTapSignIn } from './oneTap/OneTapSignIn';
+export type { OneTapUser, OneTapSignInParams } from './oneTap/types';
