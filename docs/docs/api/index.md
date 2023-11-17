@@ -125,6 +125,7 @@ The entry point of the One-tap Sign In API, exposed as `GoogleOneTapSignIn`.
 
 | Name                        | Type       | Description                                                                                                                                             |
 | :-------------------------- | :--------- | :------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `webClientId?`              | `string`   | Web client ID from Developer Console. Required to get the `idToken` on the user object, and for offline access.                                         |
 | `accountName?`              | `string`   | ANDROID ONLY. An account name that should be prioritized.                                                                                               |
 | `forceCodeForRefreshToken?` | `boolean`  | ANDROID ONLY. If true, the granted server auth code can be exchanged for an access token and a refresh token.                                           |
 | `hostedDomain?`             | `string`   | Specifies a hosted domain restriction                                                                                                                   |
@@ -132,7 +133,6 @@ The entry point of the One-tap Sign In API, exposed as `GoogleOneTapSignIn`.
 | `openIdRealm?`              | `string`   | iOS ONLY The OpenID2 realm of the home web server. This allows Google to include the user's OpenID Identifier in the OpenID Connect ID token.           |
 | `profileImageSize?`         | `number`   | iOS ONLY The desired height (and width) of the profile image. Defaults to 120px                                                                         |
 | `scopes?`                   | `string`[] | The Google API scopes to request access to. Default is email and profile.                                                                               |
-| `webClientId?`              | `string`   | Web client ID from Developer Console. Required for offline access                                                                                       |
 | `googleServicePlistPath?`   | `string`   | If you want to specify a different bundle path name for the GoogleService-Info, e.g. 'GoogleService-Info-Staging'. Mutualy exclusive with `iosClientId` |
 | `iosClientId?`              | `string`   | If you want to specify the client ID of type iOS. Mutualy exclusive with `googleServicePlistPath`.                                                      |
 
