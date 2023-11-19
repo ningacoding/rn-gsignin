@@ -57,8 +57,7 @@ document.body.appendChild(scriptTag);
 
 After the script is loaded, you can call the functions for signing in and render the `WebGoogleSigninButton`.
 
-If you call the `signIn` / `createAccount` functions before the client library is loaded, such calls will reject with the [`PLAY_SERVICES_NOT_AVAILABLE` error code](../errors).
-
+If you call any of the One-tap functions before the client library is loaded, such calls will reject with the [`PLAY_SERVICES_NOT_AVAILABLE` error code](../errors).
 
 
 To read the official docs for loading the Client Library, [click here](https://developers.google.com/identity/gsi/web/guides/client-library).

@@ -56,6 +56,9 @@ export class OneTapApp extends Component<{}, State> {
           onPress={() => {
             this._signIn();
           }}
+          onError={(error) => {
+            alert(error.toString());
+          }}
         />
         <GoogleSigninButton
           color={GoogleSigninButton.Color.Dark}

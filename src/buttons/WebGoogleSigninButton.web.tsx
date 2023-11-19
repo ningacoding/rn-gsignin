@@ -1,5 +1,6 @@
 import React from 'react';
 import type { WebGoogleSignInButtonProps } from './WebGoogleSigninButton';
+import { createGoogleSdkNotFoundError } from '../errors/errorCodes.web';
 
 const containerStyles = {
   small: { height: 20 },
@@ -15,10 +16,12 @@ export const WebGoogleSigninButton = React.memo(WebGoogleSigninButtonMemoed);
 function WebGoogleSigninButtonMemoed({
   size = 'medium',
   onPress = noop,
+  webClientId,
+  onError,
   ...rest
 }: WebGoogleSignInButtonProps) {
   const renderButton = (ref: HTMLElement | null) => {
-    if (!ensurePrerequisites(ref, rest.webClientId)) {
+    if (!ensurePrerequisites(ref, { webClientId, onError })) {
       return;
     }
 
@@ -40,13 +43,17 @@ function WebGoogleSigninButtonMemoed({
 
 function ensurePrerequisites(
   ref: HTMLElement | null,
-  webClientId: string,
+  {
+    webClientId,
+    onError,
+  }: Pick<WebGoogleSignInButtonProps, 'webClientId' | 'onError'>,
 ): ref is HTMLElement {
   if (!ref) {
     return false;
   }
   const { google } = window;
   if (!google) {
+    onError && onError(createGoogleSdkNotFoundError());
     console.warn(
       'WebGoogleSigninButton: Google Sign In SDK is not present. Did you forget to load it?',
     );

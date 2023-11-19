@@ -11,6 +11,7 @@ export type WebGoogleSignInButtonProps = Omit<
   logoAlignment?: GsiButtonConfiguration['logo_alignment'];
   onPress?: () => void;
   webClientId: string;
+  onError?: (error: Error) => void;
 };
 /**
  * @group React Components
