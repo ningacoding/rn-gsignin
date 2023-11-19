@@ -8,7 +8,7 @@ sidebar_class_name: onetap
 This is the easiest and recommended way to implement Google Sign In. It is a one-tap sign in flow that requires very little user interaction, thus increasing conversions. It is available on Android, iOS and Web.
 
 :::tip
-Please note this module is [only available to sponsors️](install) ❤️
+Please note this module is only available to sponsors️. [It takes just a few clicks to get access](install) ❤️.
 :::
 
 For detailed documentation, you can read the original docs for [Android](https://developers.google.com/identity/one-tap/android/overview) and for [Web](https://developers.google.com/identity/gsi/web/guides/offerings#one_tap). On iOS, the provided API is a wrapper of the [iOS Google Sign In SDK](https://developers.google.com/identity/sign-in/ios/start-integrating).
@@ -31,7 +31,7 @@ Attempts to sign in user automatically as explained [here](<https://developers.g
 
 Returns a `Promise` that resolves with an object containing the user data or rejects in case of error.
 
-Optionally, you can provide a `momentListener` callback function. The callback that is called only on Web when important events take place. [See reference.](https://developers.google.com/identity/gsi/web/reference/js-reference#PromptMomentNotification)
+Optionally, you can provide a `momentListener` callback function. The callback is called only on Web when important events take place. [See reference.](https://developers.google.com/identity/gsi/web/reference/js-reference#PromptMomentNotification)
 
 ```ts
 import {
@@ -72,7 +72,7 @@ Starts a flow to create a user account. It will offer the user a list of the acc
 
 Returns a `Promise` that resolves with an object containing the user data or rejects in case of error.
 
-Optionally, you can provide a `momentListener` callback function. The callback that is called only on Web when important events take place. [See reference.](https://developers.google.com/identity/gsi/web/reference/js-reference#PromptMomentNotification)
+Optionally, you can provide a `momentListener` callback function. The callback is called only on Web when important events take place. [See reference.](https://developers.google.com/identity/gsi/web/reference/js-reference#PromptMomentNotification)
 
 ```ts
 await GoogleOneTapSignIn.createAccount({

@@ -62,6 +62,13 @@ const config: Config = {
     ],
   ],
   plugins: [
+    [
+      require.resolve('docusaurus-lunr-search'),
+      {
+        disableVersioning: true,
+        excludeRoutes: ['/docs/license'],
+      },
+    ],
     // [
     //   'docusaurus-preset-shiki-twoslash',
     //   {

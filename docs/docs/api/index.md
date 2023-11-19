@@ -10,6 +10,8 @@ displayed_sidebar: apiSidebar
 
 ### statusCodes
 
+Read more about the status codes [here](errors).
+
 • `Const` **statusCodes**: `Readonly`\<\{ `IN_PROGRESS`: `string` ; `NO_SAVED_CREDENTIAL_FOUND`: `string` ; `ONE_TAP_START_FAILED`: `string` ; `PLAY_SERVICES_NOT_AVAILABLE`: `string` ; `SIGN_IN_CANCELLED`: `string` ; `SIGN_IN_REQUIRED`: `string` }\>
 
 #### Defined in
