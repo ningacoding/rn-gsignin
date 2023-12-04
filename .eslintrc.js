@@ -6,5 +6,5 @@ module.exports = {
     'plugin:jest/recommended',
   ],
   rules: {},
-  ignorePatterns: ['lib/*', 'node_modules/*', 'build/*'],
+  ignorePatterns: ['lib/*', 'node_modules/*', '**/build/*'],
 };

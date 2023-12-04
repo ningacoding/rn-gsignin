@@ -4,9 +4,9 @@ sidebar_position: 15
 
 # Obtaining configuration information
 
-Please NOTE that you **do not** need firebase to configure Google Sign In. However, if you use Firebase, it's a little easier to set up the sign in experience because Firebase gives you one file to download and put into your project.
+Please note that you **do not** need firebase to configure Google Sign In. However, if you use Firebase, it's a little easier to set up the sign in experience because Firebase gives you one file to download and put into your project.
 
-For Expo, we currently document only the procedure with Firebase, where you download a configuration file from Firebase.
+For Expo, we currently document only the procedure with Firebase, where you download a configuration file from Firebase, but adding the instructions for Expo without Firebase in on the radar.
 
 ## Without Firebase
 
