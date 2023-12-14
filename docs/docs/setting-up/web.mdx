@@ -6,7 +6,7 @@ sidebar_position: 2
 
 On the web, there is one extra step necessary to use the library: to load the Google Client Library and make it available in the browser **before** calling any of the APIs exposed by this package.
 
-There are different ways to load the client script. Some of the ways are:
+There are different ways to load the client script. Some of them are:
 
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
@@ -43,7 +43,7 @@ useEffect(() => {
     setLoaded(true);
   };
   scriptTag.onerror = () => {
-    console.error('Failed to load Google One Tap script');
+    console.error('Failed to load Google One-tap script');
   };
 
 document.body.appendChild(scriptTag);
@@ -59,9 +59,4 @@ After the script is loaded, you can call the functions for signing in and render
 
 If you call any of the One-tap functions before the client library is loaded, such calls will reject with the [`PLAY_SERVICES_NOT_AVAILABLE` error code](../errors).
 
-
 To read the official docs for loading the Client Library, [click here](https://developers.google.com/identity/gsi/web/guides/client-library).
-
-
-
-

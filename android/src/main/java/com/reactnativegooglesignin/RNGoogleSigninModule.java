@@ -27,7 +27,6 @@ import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.bridge.UiThreadUtil;
 import com.facebook.react.bridge.WritableMap;
-import com.facebook.react.module.annotations.ReactModule;
 import com.google.android.gms.auth.GoogleAuthException;
 import com.google.android.gms.auth.GoogleAuthUtil;
 import com.google.android.gms.auth.UserRecoverableAuthException;
@@ -51,7 +50,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 
-@ReactModule(name = RNGoogleSigninModule.MODULE_NAME)
 public class RNGoogleSigninModule extends NativeGoogleSigninSpec {
     private GoogleSignInClient _apiClient;
 
@@ -144,7 +142,7 @@ public class RNGoogleSigninModule extends NativeGoogleSigninSpec {
     }
 
     @ReactMethod
-    public void signInSilently(Promise promise) {
+    public void signInSilently(final Promise promise) {
         if (_apiClient == null) {
             rejectWithNullClientError(promise);
             return;

@@ -4,4 +4,4 @@ use_flipper!(false)
 
 workspace 'google-signin-example.xcworkspace'
 
-use_test_app!
+use_test_app! :hermes_enabled => true

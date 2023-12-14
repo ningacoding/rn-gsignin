@@ -7,13 +7,13 @@ sidebar_class_name: onetap
 
 This is the easiest and recommended way to implement Google Sign In. It is a one-tap sign in flow that requires very little user interaction, thus increasing conversions. It is available on Android, iOS and Web.
 
+It is built on top of the [Android Credential Manager](https://developers.google.com/identity/android-credential-manager) and [One Tap](https://developers.google.com/identity/gsi/web/guides/offerings#one_tap) on the Web. On iOS, the provided API is a wrapper of the [iOS Google Sign In SDK](https://developers.google.com/identity/sign-in/ios/start-integrating).
+
 :::tip
-Please note this module is only available to sponsors️. [It takes just a few clicks to get access](install) ❤️.
+Please note this module is only available to sponsors️. [It takes just a few clicks to get access](install#accessing-the-new-package-for-sponsors) ❤️.
 :::
 
-For detailed documentation, you can read the original docs for [Android](https://developers.google.com/identity/one-tap/android/overview) and for [Web](https://developers.google.com/identity/gsi/web/guides/offerings#one_tap). On iOS, the provided API is a wrapper of the [iOS Google Sign In SDK](https://developers.google.com/identity/sign-in/ios/start-integrating).
-
-Note that on iOS and Android, you can combine the one-tap methods with those one from the [Original Google Sign In](original), i.e. you can use the One Tap sign in to sign in the user. Then call `signInSilently()` and then (for example) `getCurrentUser()` to get the user data.
+Note that on iOS and Android, you can combine the one-tap methods with those one from the [Original Google Sign In](original). To do that, use the One-tap sign in to sign in the user. Then call `signInSilently()` and then (for example) `getCurrentUser()` to get the current user's information.
 
 ```ts
 import {
@@ -29,7 +29,7 @@ signature: (`params`: [`OneTapSignInParams`](api#onetapsigninparams), `momentLis
 
 Attempts to sign in user automatically as explained [here](<https://developers.google.com/android/reference/com/google/android/gms/auth/api/identity/BeginSignInRequest.Builder#setAutoSelectEnabled(boolean)>).
 
-Returns a `Promise` that resolves with an object containing the user data or rejects in case of error.
+Returns a `Promise` that resolves with an object containing the user data or rejects in case of error. If there is no user that previously signed in, the promise will reject with [`NO_SAVED_CREDENTIAL_FOUND`](http://localhost:3000/docs/errors#one-tap-specific-errors) error. In that case, you can call [`createAccount`](one-tap#createaccount) to start a flow to create a new account.
 
 Optionally, you can provide a `momentListener` callback function. The callback is called only on Web when important events take place. [See reference.](https://developers.google.com/identity/gsi/web/reference/js-reference#PromptMomentNotification)
 
@@ -44,21 +44,27 @@ signIn = async () => {
   try {
     const userInfo = await GoogleOneTapSignIn.signIn({
       webClientId: config.webClientId,
+      iosClientId: config.iosClientId, // only needed if you're not using Firebase config file
       nonce: 'your_nonce',
     });
     setState({ userInfo });
   } catch (error) {
-    if (error.code === statusCodes.SIGN_IN_CANCELLED) {
-      // user cancelled the login flow
-    } else if (error.code === statusCodes.IN_PROGRESS) {
-      // operation (e.g. sign in) is in progress already
-    } else if (error.code === statusCodes.ONE_TAP_START_FAILED) {
-      // starting the one tap dialog failed
-    } else if (error.code === statusCodes.NO_SAVED_CREDENTIAL_FOUND) {
-      // No saved credentials found. Launch the One Tap sign-up flow (use GoogleOneTapSignIn.signUp)
-      // or do nothing and continue presenting the signed-out UI.
+    if (isErrorWithCode(error)) {
+      switch (error.code) {
+        case statusCodes.NO_SAVED_CREDENTIAL_FOUND:
+          // no saved credential found, try creating an account
+          break;
+        case statusCodes.SIGN_IN_CANCELLED:
+          // sign in was cancelled
+          break;
+        case statusCodes.ONE_TAP_START_FAILED:
+          // Android and Web only, you probably have hit rate limiting. You can still call the original Google Sign In API in this case.
+          break;
+        default:
+        // something else happened
+      }
     } else {
-      // some other error happened
+      // an error that's not related to google sign in occurred
     }
   }
 };
@@ -68,7 +74,7 @@ signIn = async () => {
 
 signature: (`params`: [`OneTapSignInParams`](api#onetapsigninparams), `momentListener?`: (`promptMomentNotification`: `PromptMomentNotification`) => `void`) => `Promise`\<[`OneTapUser`](api#onetapuser)\>
 
-Starts a flow to create a user account. It will offer the user a list of the accounts to choose from (When multiple Google accounts are logged in on the device). Also, it can be used if `signIn` rejects with `NO_SAVED_CREDENTIAL_FOUND` error, as shown in the code snippet above.
+Starts a flow to create a user account. It offers a list of user accounts to choose from (When multiple Google accounts are logged in on the device). Also, it can be used if `signIn` rejects with `NO_SAVED_CREDENTIAL_FOUND` error, as shown in the code snippet above.
 
 Returns a `Promise` that resolves with an object containing the user data or rejects in case of error.
 

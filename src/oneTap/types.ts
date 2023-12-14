@@ -11,6 +11,7 @@ type ReducedWebOptions = Omit<
  * */
 export type OneTapSignInParams = {
   webClientId: string;
+  iosClientId?: string;
   nonce?: string;
   autoSignIn?: boolean;
   filterByAuthorizedAccounts?: boolean;

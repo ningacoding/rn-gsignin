@@ -6,7 +6,7 @@ sidebar_position: 15
 
 Please note that you **do not** need firebase to configure Google Sign In. However, if you use Firebase, it's a little easier to set up the sign in experience because Firebase gives you one file to download and put into your project.
 
-For Expo, we currently document only the procedure with Firebase, where you download a configuration file from Firebase, but adding the instructions for Expo without Firebase in on the radar.
+If you're using Expo EAS and Firebase, read [credentials docs](https://docs.expo.dev/app-signing/managed-credentials/#inspecting-credentials-configuration) to learn how to obtain information for [step 2 of the firebase setup](#2-enter-required-information-and-download-the-config-file).
 
 ## Without Firebase
 
@@ -25,19 +25,17 @@ Follow the instructions at ["Configure a Google API Console project"](https://de
 `webClientId` can be found [here](https://console.developers.google.com/apis/credentials).
 Make sure you select the correct project. `webClientId` should be under OAuth section.
 
-## With Firebase (and Expo)
-
-If you're using Expo EAS, read [credentials docs](https://docs.expo.dev/app-signing/managed-credentials/#inspecting-credentials-configuration) to learn how to obtain information for step 2.
+## With Firebase
 
 If you don't already have a project in Firebase you need to create one in order to add credentials for your iOS and Android application.
 
 [Firebase console](https://console.firebase.google.com/u/0/)
 
-### 1. Add your iOS and Android App inside Project settings (see image).
+### 1. Add your iOS and Android App inside Project settings
 
 ![Project settings](/img/project-settings.png)
 
-### 2. Enter required information and download the config file.
+### 2. Enter required information and download the config file
 
 _Note: For Android, adding the SHA1 hash is an obligation_
 

@@ -7,6 +7,7 @@ buildscript {
 }
 
 apply plugin: 'com.android.library'
+apply plugin: 'org.jetbrains.kotlin.android'
 
 def isNewArchitectureEnabled() {
   // To opt-in for the New Architecture, you can either:
@@ -73,4 +74,7 @@ dependencies {
   // while we could parse the token on JS side, we would need to polyfill atob to do that.
   // it ends up being easier to do it on native side.
   implementation 'com.auth0.android:jwtdecode:2.0.2'
+  implementation "com.google.android.libraries.identity.googleid:googleid:1.1.0"
+  implementation "androidx.credentials:credentials:1.2.0"
+  implementation "androidx.credentials:credentials-play-services-auth:1.2.0"
 }

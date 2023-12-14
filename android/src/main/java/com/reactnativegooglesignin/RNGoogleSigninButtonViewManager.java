@@ -9,7 +9,6 @@ import androidx.annotation.Nullable;
 
 import com.facebook.react.bridge.ReactContext;
 import com.facebook.react.common.MapBuilder;
-import com.facebook.react.module.annotations.ReactModule;
 import com.facebook.react.uimanager.SimpleViewManager;
 import com.facebook.react.uimanager.ThemedReactContext;
 import com.facebook.react.uimanager.UIManagerHelper;
@@ -19,7 +18,6 @@ import com.google.android.gms.common.SignInButton;
 
 import java.util.Map;
 
-@ReactModule(name = RNGoogleSigninButtonViewManager.MODULE_NAME)
 public class RNGoogleSigninButtonViewManager extends SimpleViewManager<SignInButton> implements RNGoogleSigninButtonManagerInterface<SignInButton> {
 
     public static final String MODULE_NAME = "RNGoogleSigninButton";

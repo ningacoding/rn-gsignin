@@ -28,7 +28,7 @@ const signOut: OneTapSignInModule['signOut'] = () => {
 };
 
 /**
- * The entry point of the One-tap Sign In API, exposed as `GoogleOneTapSignIn`.
+ * The entry point of the One-tap Sign In API, exposed as `GoogleOneTapSignIn`. This module uses the [Android Credential Manager](https://developers.google.com/identity/android-credential-manager) under the hood.
  * @group One-tap sign in module
  *
  *

@@ -81,6 +81,7 @@ const config: Config = {
     //     entryPoints: ['../src/index.ts'],
     //     tsconfig: '../tsconfig.json',
     //     watch: true,
+    //     disableSources: true,
     //     readme: 'none',
     //     name: 'google-signin',
     //   },

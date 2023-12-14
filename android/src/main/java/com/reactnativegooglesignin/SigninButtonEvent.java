@@ -17,7 +17,6 @@ public class SigninButtonEvent extends Event<SigninButtonEvent> {
 
     @Override
     protected WritableMap getEventData() {
-        WritableMap eventData = Arguments.createMap();
-        return eventData;
+      return Arguments.createMap();
     }
 }

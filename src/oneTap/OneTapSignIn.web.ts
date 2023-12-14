@@ -1,21 +1,13 @@
-import { jwtDecode, type JwtPayload } from 'jwt-decode';
 import type { OneTapSignInModule, OneTapUser } from './types';
 import {
   createCancelError,
   createFlowRestartedError,
   createGoogleSdkNotFoundError,
   createNotShownError,
+  createSignOutFailedError,
   statusCodes,
 } from '../errors/errorCodes.web';
-import { getSubject } from './tokenUtils';
-
-type JwtContents = {
-  name: string | null;
-  given_name: string | null;
-  family_name: string | null;
-  picture: string | null;
-  email: string;
-};
+import { extractUser } from './tokenUtils';
 
 function ensureGoogleSdkPresent() {
   if (typeof window !== 'undefined' && !window.google) {
@@ -44,23 +36,9 @@ const signIn: OneTapSignInModule['signIn'] = (
       context: 'signin',
       ...otherParams,
       callback: ({ credential: idToken, select_by }) => {
-        const parsed = jwtDecode<JwtPayload & JwtContents>(idToken);
-        const name = parsed.name;
-        const givenName = parsed.given_name;
-        const familyName = parsed.family_name;
-        const photo = parsed.picture;
-        const email = parsed.email;
-        const subject = getSubject(parsed, email);
-
+        const user = extractUser(idToken);
         const userInfo: OneTapUser = {
-          user: {
-            id: subject,
-            name,
-            email,
-            givenName,
-            familyName,
-            photo,
-          },
+          user,
           idToken,
           password: null,
           credentialOrigin: select_by,
@@ -110,7 +88,7 @@ const signOut = async (emailOrUniqueId: string): Promise<null> => {
         accounts.id.disableAutoSelect();
         resolve(null);
       } else {
-        reject(new Error(`Sign out failed: ${error}`, { cause: error }));
+        reject(createSignOutFailedError(error));
       }
     });
   });

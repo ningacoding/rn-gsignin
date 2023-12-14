@@ -18,20 +18,19 @@ import {
   WebGoogleSigninButton,
   OneTapSignInParams,
   GoogleSigninButton,
+  isErrorWithCode,
 } from '@react-native-google-signin/google-signin';
 // @ts-ignore see docs/CONTRIBUTING.md for details
-import config from '../config/config';
+import config from './config/config';
 import {
   configureGoogleSignIn,
   PROFILE_IMAGE_SIZE,
   RenderError,
-} from '../components';
-
-type ErrorWithCode = Error & { code?: string };
+} from './components/components';
 
 type State = {
   userInfo: OneTapUser | undefined;
-  error: ErrorWithCode | undefined;
+  error: NativeModuleError | undefined;
 };
 
 const prettyJson = (value: any) => {
@@ -139,12 +138,11 @@ export class OneTapApp extends Component<{}, State> {
     try {
       const userInfo = await GoogleOneTapSignIn.createAccount({
         webClientId: config.webClientId,
+        iosClientId: config.iosClientId,
       });
       this.setState({ userInfo, error: undefined });
     } catch (error) {
-      const typedError = error as NativeModuleError;
-      alert('Something went wrong' + typedError.toString());
-      this.setState({ error: typedError });
+      this.handleError(error);
     }
   };
 
@@ -152,14 +150,21 @@ export class OneTapApp extends Component<{}, State> {
     try {
       const userInfo = await GoogleOneTapSignIn.signIn({
         webClientId: config.webClientId,
+        iosClientId: config.iosClientId,
         ...extraParams,
       });
 
       this.setState({ userInfo, error: undefined });
     } catch (error) {
-      const typedError = error as NativeModuleError;
+      setTimeout(() => {
+        this.handleError(error);
+      }, 500);
+    }
+  };
 
-      switch (typedError.code) {
+  handleError = (error: unknown) => {
+    if (isErrorWithCode(error)) {
+      switch (error.code) {
         case statusCodes.NO_SAVED_CREDENTIAL_FOUND: {
           alert('no saved credential found, try creating an account');
           break;
@@ -175,7 +180,7 @@ export class OneTapApp extends Component<{}, State> {
         case statusCodes.ONE_TAP_START_FAILED:
           // Android and Web only
           alert(
-            'failed to present one tap UI, maybe because user closed the popup previously?',
+            'failed to present one tap UI, maybe the user closed the popup previously, and you are hitting rate limit.',
           );
           break;
         case statusCodes.PLAY_SERVICES_NOT_AVAILABLE:
@@ -183,11 +188,13 @@ export class OneTapApp extends Component<{}, State> {
           alert('play services not available or outdated');
           break;
         default:
-          alert('Something went wrong' + typedError.toString());
+          alert('Something went wrong' + error.toString() + error.code);
       }
       this.setState({
-        error: typedError,
+        error: error,
       });
+    } else {
+      alert(`an error that's not related to google sign in occurred`);
     }
   };
 

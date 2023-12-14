@@ -58,19 +58,6 @@ public class PromiseWrapper {
         rejecter.reject(dto.getCode(), dto.getMessage(), e);
     }
 
-    public void reject(IGetsErrorDetails getsErrorDetails) {
-        Promise rejecter = promise;
-        if (rejecter == null) {
-            Log.w(MODULE_NAME, "cannot reject promise because it's null");
-            return;
-        }
-
-        ErrorDto dto = getsErrorDetails.getErrorDto();
-
-        resetMembers();
-        rejecter.reject(dto.getCode(), dto.getMessage());
-    }
-
     public String getNameOfCallInProgress(){
         return nameOfCallInProgress;
     }

@@ -8,15 +8,8 @@ const signIn: OneTapSignInModule['signIn'] = async (params) => {
     throw new Error('No idToken present in the signIn response');
   }
   const oneTapUser: OneTapUser = {
-    user: {
-      id: user.id,
-      email: user.email,
-      name: user.name,
-      givenName: user.givenName,
-      familyName: user.familyName,
-      photo: user.photo,
-    },
-    idToken: idToken,
+    user,
+    idToken,
     password: null,
     // credentialOrigin is not available on the iOS side and is added for compatibility with web
     credentialOrigin: 'user',

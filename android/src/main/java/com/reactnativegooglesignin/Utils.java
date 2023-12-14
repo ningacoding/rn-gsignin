@@ -1,23 +1,22 @@
 package com.reactnativegooglesignin;
 
 import android.net.Uri;
+
 import androidx.annotation.NonNull;
 
 import com.auth0.android.jwt.JWT;
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.ReadableArray;
-import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.bridge.WritableArray;
 import com.facebook.react.bridge.WritableMap;
-import com.google.android.gms.auth.api.identity.BeginSignInRequest;
-import com.google.android.gms.auth.api.identity.SignInCredential;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
+import com.google.android.gms.common.Scopes;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.common.api.CommonStatusCodes;
 import com.google.android.gms.common.api.Scope;
-import com.google.android.gms.common.Scopes;
 import com.google.android.gms.tasks.Task;
+import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential;
 
 public class Utils {
 
@@ -55,10 +54,10 @@ public class Utils {
         return params;
     }
 
-    static WritableMap getUserProperties(@NonNull SignInCredential acct) {
+    static WritableMap getUserProperties(@NonNull GoogleIdTokenCredential acct) {
         Uri photoUrl = acct.getProfilePictureUri();
-        String idToken = acct.getGoogleIdToken();
-        String email = idToken == null ? null : acct.getId();
+        String idToken = acct.getIdToken();
+        String email = acct.getId();
 
         WritableMap user = Arguments.createMap();
         user.putString("id", getSubjectId(acct));
@@ -71,17 +70,15 @@ public class Utils {
         WritableMap params = Arguments.createMap();
         params.putMap("user", user);
         params.putString("idToken", idToken);
-        params.putString("password", acct.getPassword());
         // credentialOrigin is not available on the Android side and is added for compatibility with web
         params.putString("credentialOrigin", "user");
 
         return params;
     }
 
-    static String getSubjectId(@NonNull SignInCredential acct) {
+    static String getSubjectId(@NonNull GoogleIdTokenCredential acct) {
         try {
-          String token = acct.getGoogleIdToken();
-          assert token != null;
+          String token = acct.getIdToken();
           JWT jwt = new JWT(token);
           return jwt.getSubject();
         } catch (Exception e) {
@@ -112,32 +109,6 @@ public class Utils {
             googleSignInOptionsBuilder.setHostedDomain(hostedDomain);
         }
         return googleSignInOptionsBuilder.build();
-    }
-
-    static BeginSignInRequest buildOneTapSignInRequest(
-        ReadableMap params
-    ) {
-        String webClientId = params.getString("webClientId");
-        assert webClientId != null;
-        String nonce = params.getString("nonce");
-        boolean autoSignIn = params.getBoolean("autoSignIn");
-        boolean filterByAuthorizedAccounts = params.getBoolean("filterByAuthorizedAccounts");
-        boolean passwordRequestSupported = params.getBoolean("passwordRequestSupported");
-        boolean idTokenRequestSupported = params.getBoolean("idTokenRequestSupported");
-
-        return BeginSignInRequest.builder()
-            .setPasswordRequestOptions(BeginSignInRequest.PasswordRequestOptions.builder()
-                .setSupported(passwordRequestSupported)
-                .build())
-            .setGoogleIdTokenRequestOptions(BeginSignInRequest.GoogleIdTokenRequestOptions.builder()
-                .setSupported(idTokenRequestSupported)
-                .setServerClientId(webClientId)
-                .setNonce(nonce)
-                .setFilterByAuthorizedAccounts(filterByAuthorizedAccounts)
-                .build())
-            // Automatically sign in when exactly one credential is retrieved.
-            .setAutoSelectEnabled(autoSignIn)
-            .build();
     }
 
     @NonNull

@@ -29,6 +29,7 @@ export const createCancelError = (
 export const createNotShownError = (
   reason: ReturnType<PromptMomentNotification['getNotDisplayedReason']>,
 ) => {
+  // happens with rate limiting
   const err = new Error(`One-tap sign in not displayed: ${reason}`);
   Object.assign(err, {
     code: statusCodes.ONE_TAP_START_FAILED,
@@ -49,6 +50,14 @@ export const createGoogleSdkNotFoundError = () => {
   );
   Object.assign(err, {
     code: statusCodes.PLAY_SERVICES_NOT_AVAILABLE,
+  });
+  return err;
+};
+
+export const createSignOutFailedError = (error?: string) => {
+  const err = new Error(`Sign out failed: ${error}`);
+  Object.assign(err, {
+    code: 'signOut',
   });
   return err;
 };

@@ -14,9 +14,24 @@ Read more about the status codes [here](errors).
 
 • `Const` **statusCodes**: `Readonly`\<\{ `IN_PROGRESS`: `string` ; `NO_SAVED_CREDENTIAL_FOUND`: `string` ; `ONE_TAP_START_FAILED`: `string` ; `PLAY_SERVICES_NOT_AVAILABLE`: `string` ; `SIGN_IN_CANCELLED`: `string` ; `SIGN_IN_REQUIRED`: `string` }\>
 
-#### Defined in
+## Functions
 
-[src/errors/errorCodes.ts:16](https://github.com/react-native-google-signin/google-signin/blob/322c98d/src/errors/errorCodes.ts#L16)
+### isErrorWithCode
+
+▸ **isErrorWithCode**(`error`): error is NativeModuleError
+
+TypeScript helper to check if an object has the `code` property.
+This is used to avoid `as` casting when you access the `code` property on errors returned by the module.
+
+#### Parameters
+
+| Name    | Type  |
+| :------ | :---- |
+| `error` | `any` |
+
+#### Returns
+
+error is NativeModuleError
 
 ## One-tap sign in module
 
@@ -26,7 +41,8 @@ Read more about the status codes [here](errors).
 
 | Name                          | Type      | Description                                                                                                                                                                                                                           |
 | ----------------------------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `webClientId`                 | `string`  | The web client ID.                                                                                                                                                                                                                    |
+| `webClientId`                 | `string`  | The web client ID obtained from Google Cloud console.                                                                                                                                                                                 |
+| `iosClientId?`                | `string`  | The iOS client ID obtained from Google Cloud console. Provide this if you're not using the config file from Firebase.                                                                                                                 |
 | `nonce?`                      | `string`  | Optional. random string used by the ID token to prevent replay attacks.                                                                                                                                                               |
 | `autoSignIn?`                 | `boolean` | Optional. If true, enables auto sign-in.                                                                                                                                                                                              |
 | `filterByAuthorizedAccounts?` | `boolean` | Optional. [Filters by authorized accounts](<https://developers.google.com/android/reference/com/google/android/gms/auth/api/identity/BeginSignInRequest.GoogleIdTokenRequestOptions.Builder#setFilterByAuthorizedAccounts(boolean)>). |
@@ -50,10 +66,6 @@ The following are available on the Web. [Read the value descriptions here](https
 | `itp_support?`                        | `boolean`                           |             |
 | `log_level?`                          | `"debug"` \| `"info"` \| `"warn"`   |             |
 
-#### Defined in
-
-[src/oneTap/types.ts:12](https://github.com/react-native-google-signin/google-signin/blob/322c98d/src/oneTap/types.ts#L12)
-
 ---
 
 ### OneTapUser
@@ -73,17 +85,13 @@ The following are available on the Web. [Read the value descriptions here](https
 | `password`         | `string` \| `null`                                                                                                                         | The password for the user. Present if `idToken` is `null`.            |
 | `credentialOrigin` | `"auto"` \| `"user"` \| `"user_1tap"` \| `"user_2tap"` \| `"btn"` \| `"btn_confirm"` \| `"btn_add_session"` \| `"btn_confirm_add_session"` | The origin of the credential selection. Always 'user' in native apps. |
 
-#### Defined in
-
-[src/oneTap/types.ts:24](https://github.com/react-native-google-signin/google-signin/blob/322c98d/src/oneTap/types.ts#L24)
-
 ---
 
 ### GoogleOneTapSignIn
 
 • `Const` **GoogleOneTapSignIn**: `Object`
 
-The entry point of the One-tap Sign In API, exposed as `GoogleOneTapSignIn`.
+The entry point of the One-tap Sign In API, exposed as `GoogleOneTapSignIn`. This module uses the [Android Credential Manager](https://developers.google.com/identity/android-credential-manager) under the hood.
 
 **`Param`**
 
@@ -97,10 +105,6 @@ The entry point of the One-tap Sign In API, exposed as `GoogleOneTapSignIn`.
 | `signIn`        | (`params`: [`OneTapSignInParams`](#onetapsigninparams), `momentListener?`: (`promptMomentNotification`: `PromptMomentNotification`) => `void`) => `Promise`\<[`OneTapUser`](#onetapuser)\> |
 | `signOut`       | (`emailOrUniqueId`: `string`) => `Promise`\<`null`\>                                                                                                                                       |
 
-#### Defined in
-
-[src/oneTap/OneTapSignIn.ts:36](https://github.com/react-native-google-signin/google-signin/blob/322c98d/src/oneTap/OneTapSignIn.ts#L36)
-
 ## Original Google sign in
 
 ### AddScopesParams
@@ -112,10 +116,6 @@ The entry point of the One-tap Sign In API, exposed as `GoogleOneTapSignIn`.
 | Name     | Type       | Description                                                               |
 | :------- | :--------- | :------------------------------------------------------------------------ |
 | `scopes` | `string`[] | The Google API scopes to request access to. Default is email and profile. |
-
-#### Defined in
-
-[src/types.ts:96](https://github.com/react-native-google-signin/google-signin/blob/322c98d/src/types.ts#L96)
 
 ---
 
@@ -138,10 +138,6 @@ The entry point of the One-tap Sign In API, exposed as `GoogleOneTapSignIn`.
 | `googleServicePlistPath?`   | `string`   | If you want to specify a different bundle path name for the GoogleService-Info, e.g. 'GoogleService-Info-Staging'. Mutualy exclusive with `iosClientId` |
 | `iosClientId?`              | `string`   | If you want to specify the client ID of type iOS. Mutualy exclusive with `googleServicePlistPath`.                                                      |
 
-#### Defined in
-
-[src/types.ts:15](https://github.com/react-native-google-signin/google-signin/blob/322c98d/src/types.ts#L15)
-
 ---
 
 ### GetTokensResponse
@@ -155,10 +151,6 @@ The entry point of the One-tap Sign In API, exposed as `GoogleOneTapSignIn`.
 | `accessToken` | `string` |
 | `idToken`     | `string` |
 
-#### Defined in
-
-[src/types.ts:106](https://github.com/react-native-google-signin/google-signin/blob/322c98d/src/types.ts#L106)
-
 ---
 
 ### HasPlayServicesParams
@@ -171,10 +163,6 @@ The entry point of the One-tap Sign In API, exposed as `GoogleOneTapSignIn`.
 | :----------------------------- | :-------- | :------------------------------------------------------------------------------------------------------------------------- |
 | `showPlayServicesUpdateDialog` | `boolean` | Optional. Whether to show a dialog that promps the user to install Google Play Services, if they don't have them installed |
 
-#### Defined in
-
-[src/types.ts:85](https://github.com/react-native-google-signin/google-signin/blob/322c98d/src/types.ts#L85)
-
 ---
 
 ### SignInParams
@@ -186,10 +174,6 @@ The entry point of the One-tap Sign In API, exposed as `GoogleOneTapSignIn`.
 | Name         | Type     | Description                                                                                                                                                                                                                             |
 | :----------- | :------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `loginHint?` | `string` | iOS only. The user's ID, or email address, to be prefilled in the authentication UI if possible. [See docs here](https://developers.google.com/identity/sign-in/ios/api/interface_g_i_d_sign_in.html#a0a68c7504c31ab0b728432565f6e33fd) |
-
-#### Defined in
-
-[src/types.ts:4](https://github.com/react-native-google-signin/google-signin/blob/322c98d/src/types.ts#L4)
 
 ---
 
@@ -211,10 +195,6 @@ The entry point of the One-tap Sign In API, exposed as `GoogleOneTapSignIn`.
 | `user.id`         | `string`                                                                                                                                                                | -                                                                                          |
 | `user.name`       | `string` \| `null`                                                                                                                                                      | -                                                                                          |
 | `user.photo`      | `string` \| `null`                                                                                                                                                      | -                                                                                          |
-
-#### Defined in
-
-[src/types.ts:114](https://github.com/react-native-google-signin/google-signin/blob/322c98d/src/types.ts#L114)
 
 ---
 
@@ -240,21 +220,9 @@ The entry point of the Google Sign In API, exposed as `GoogleSignin`.
 | `signInSilently`         | () => `Promise`\<[`User`](#user)\>                                                           |
 | `signOut`                | () => `Promise`\<`null`\>                                                                    |
 
-#### Defined in
-
-[src/signIn/GoogleSignin.ts:106](https://github.com/react-native-google-signin/google-signin/blob/322c98d/src/signIn/GoogleSignin.ts#L106)
-
 ## React Components
 
 • **GoogleSigninButton**: `Object`
-
-#### Defined in
-
-[src/buttons/GoogleSigninButton.tsx:26](https://github.com/react-native-google-signin/google-signin/blob/322c98d/src/buttons/GoogleSigninButton.tsx#L26)
-
-[src/buttons/GoogleSigninButton.tsx:55](https://github.com/react-native-google-signin/google-signin/blob/322c98d/src/buttons/GoogleSigninButton.tsx#L55)
-
-[src/buttons/GoogleSigninButton.tsx:56](https://github.com/react-native-google-signin/google-signin/blob/322c98d/src/buttons/GoogleSigninButton.tsx#L56)
 
 ### GoogleSigninButtonProps
 
@@ -270,10 +238,6 @@ Also inherits [ViewProps](https://reactnative.dev/docs/view#props).
 | `disabled?` | `boolean`             |
 | `onPress?`  | () => `void`          |
 | `size?`     | `number`              |
-
-#### Defined in
-
-[src/buttons/GoogleSigninButton.tsx:15](https://github.com/react-native-google-signin/google-signin/blob/322c98d/src/buttons/GoogleSigninButton.tsx#L15)
 
 ---
 
@@ -294,10 +258,6 @@ Also inherits [ViewProps](https://reactnative.dev/docs/view#props).
 | `locale?`        | `string`                                                              | Optional. The locale for the sign-in button.               |
 | `logoAlignment?` | `"left"` \| `"center"`                                                | Optional. The alignment of the logo on the button.         |
 
-#### Defined in
-
-[src/buttons/WebGoogleSigninButton.tsx:7](https://github.com/react-native-google-signin/google-signin/blob/322c98d/src/buttons/WebGoogleSigninButton.tsx#L7)
-
 ---
 
 ### GoogleSigninButton
@@ -314,10 +274,6 @@ Also inherits [ViewProps](https://reactnative.dev/docs/view#props).
 
 `Element`
 
-#### Defined in
-
-[src/buttons/GoogleSigninButton.tsx:26](https://github.com/react-native-google-signin/google-signin/blob/322c98d/src/buttons/GoogleSigninButton.tsx#L26)
-
 ---
 
 ### WebGoogleSigninButton
@@ -333,7 +289,3 @@ Also inherits [ViewProps](https://reactnative.dev/docs/view#props).
 #### Returns
 
 `Element`
-
-#### Defined in
-
-[src/buttons/WebGoogleSigninButton.tsx:18](https://github.com/react-native-google-signin/google-signin/blob/322c98d/src/buttons/WebGoogleSigninButton.tsx#L18)

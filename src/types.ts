@@ -128,3 +128,13 @@ export type User = {
 export interface NativeModuleError extends Error {
   code: string;
 }
+
+/**
+ * TypeScript helper to check if an object has the `code` property.
+ * This is used to avoid `as` casting when you access the `code` property on errors returned by the module.
+ */
+export const isErrorWithCode = (error: any): error is NativeModuleError => {
+  // to account for https://github.com/facebook/react-native/issues/41950
+  const isNewArchErrorIOS = typeof error === 'object' && error != null;
+  return (error instanceof Error || isNewArchErrorIOS) && 'code' in error;
+};

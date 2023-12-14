@@ -30,11 +30,6 @@ public class ErrorDto {
         }
     }
 
-    public ErrorDto(String errorCode, String localizedMessage) {
-        this.code = errorCode;
-        this.message = localizedMessage;
-    }
-
     public String getCode() {
         return code;
     }
