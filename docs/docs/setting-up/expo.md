@@ -14,6 +14,12 @@ Read Expo's ["Adding custom native code"](https://docs.expo.io/workflow/customiz
 
 :::
 
+:::info
+
+With Expo SDK 50, minimum iOS version was bumped to 13.4. If unsure, please consult release notes to determine the right version of this package to install.
+
+:::
+
 ```sh
 npx expo install @react-native-google-signin/google-signin
 ```
