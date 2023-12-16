@@ -24,7 +24,7 @@ After installing this npm package, add the provided [config plugin](https://docs
 
 If you're _not_ using Firebase, provide the `iosUrlScheme` option to the config plugin.
 
-To obtain `iosUrlScheme`, go to the [Google Cloud Console](https://console.cloud.google.com/apis/credentials) and copy the "iOS URL scheme" from your iOS client in the "OAuth 2.0 Client IDs" section. Note that the config plugin that works without Firebase is only [available to sponsors](install#accessing-the-new-package-for-sponsors) of this module.
+To obtain `iosUrlScheme`, go to the [Google Cloud Console](https://console.cloud.google.com/apis/credentials) and copy the "iOS URL scheme" from your iOS client in the "OAuth 2.0 Client IDs" section. Note that the config plugin that works without Firebase is only [available to sponsors](../install.mdx#accessing-the-new-package-for-sponsors) of this module.
 
 ```json title="app.json"
 {
