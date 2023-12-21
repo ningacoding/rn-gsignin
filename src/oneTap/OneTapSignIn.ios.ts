@@ -10,7 +10,6 @@ const signIn: OneTapSignInModule['signIn'] = async (params) => {
   const oneTapUser: OneTapUser = {
     user,
     idToken,
-    password: null,
     // credentialOrigin is not available on the iOS side and is added for compatibility with web
     credentialOrigin: 'user',
   };

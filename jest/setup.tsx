@@ -84,7 +84,6 @@ export const mockOneTapUserInfo: OneTapUser = {
     name: 'mockFullName',
   },
   idToken: 'mockIdToken',
-  password: null,
   credentialOrigin: 'user',
 };
 const mockSignIn = jest.fn().mockResolvedValue(mockOneTapUserInfo);

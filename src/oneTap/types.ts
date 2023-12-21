@@ -15,8 +15,6 @@ export type OneTapSignInParams = {
   nonce?: string;
   autoSignIn?: boolean;
   filterByAuthorizedAccounts?: boolean;
-  passwordRequestSupported?: boolean;
-  idTokenRequestSupported?: boolean;
 } & ReducedWebOptions;
 
 /**
@@ -31,19 +29,9 @@ export type OneTapUser = {
     familyName: string | null;
     photo: string | null;
   };
-} & TokenOrPassword & {
-    credentialOrigin: CredentialResponse['select_by'];
-  };
-
-type TokenOrPassword =
-  | {
-      idToken: string;
-      password: null;
-    }
-  | {
-      idToken: null;
-      password: string;
-    };
+  idToken: string;
+  credentialOrigin: CredentialResponse['select_by'];
+};
 
 type MomentListener = Parameters<accounts['id']['prompt']>[0];
 

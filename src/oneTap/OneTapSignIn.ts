@@ -5,8 +5,6 @@ const signIn: OneTapSignInModule['signIn'] = (params): Promise<OneTapUser> => {
   return OneTapNativeModule.signIn({
     autoSignIn: true,
     filterByAuthorizedAccounts: true,
-    passwordRequestSupported: true,
-    idTokenRequestSupported: true,
     ...params,
   }) as Promise<OneTapUser>;
 };
@@ -16,8 +14,6 @@ const createAccount: OneTapSignInModule['createAccount'] = (
   return OneTapNativeModule.signIn({
     autoSignIn: false,
     filterByAuthorizedAccounts: false,
-    passwordRequestSupported: false,
-    idTokenRequestSupported: true,
     ...params,
   }) as Promise<OneTapUser>;
 };

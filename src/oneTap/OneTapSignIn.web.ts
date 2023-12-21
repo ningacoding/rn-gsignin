@@ -40,7 +40,6 @@ const signIn: OneTapSignInModule['signIn'] = (
         const userInfo: OneTapUser = {
           user,
           idToken,
-          password: null,
           credentialOrigin: select_by,
         };
         resolve(userInfo);

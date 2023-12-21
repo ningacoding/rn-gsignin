@@ -47,9 +47,6 @@ error is NativeModuleError
 | `autoSignIn?`                 | `boolean` | Optional. If true, enables auto sign-in.                                                                                                                                                                                              |
 | `filterByAuthorizedAccounts?` | `boolean` | Optional. [Filters by authorized accounts](<https://developers.google.com/android/reference/com/google/android/gms/auth/api/identity/BeginSignInRequest.GoogleIdTokenRequestOptions.Builder#setFilterByAuthorizedAccounts(boolean)>). |
 
-[//]: # '| `passwordRequestSupported?`   | `boolean` | Optional. If true, supports password request. |'
-[//]: # '| `idTokenRequestSupported?`    | `boolean` | Optional. If true, supports ID token request. |'
-
 The following are available on the Web. [Read the value descriptions here](https://developers.google.com/identity/gsi/web/reference/js-reference).
 
 | Name                                  | Type                                | Description |
@@ -81,8 +78,7 @@ The following are available on the Web. [Read the value descriptions here](https
 | `user.givenName`   | `string` \| `null`                                                                                                                         | The given name (first name) of the user, if available.                |
 | `user.familyName`  | `string` \| `null`                                                                                                                         | The family name (last name) of the user, if available.                |
 | `user.photo`       | `string` \| `null`                                                                                                                         | The URL to the user's photo, if available.                            |
-| `idToken`          | `string` \| `null`                                                                                                                         | The ID token for the user. Present if `password` is `null`.           |
-| `password`         | `string` \| `null`                                                                                                                         | The password for the user. Present if `idToken` is `null`.            |
+| `idToken`          | `string`                                                                                                                                   | The ID token for the user.                                            |
 | `credentialOrigin` | `"auto"` \| `"user"` \| `"user_1tap"` \| `"user_2tap"` \| `"btn"` \| `"btn_confirm"` \| `"btn_add_session"` \| `"btn_confirm_add_session"` | The origin of the credential selection. Always 'user' in native apps. |
 
 ---
