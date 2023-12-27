@@ -39,10 +39,6 @@ const withGoogleSignInWithoutFirebase: ConfigPlugin<Options> = (
 ) => {
   validateOptions(options);
   return withPlugins(config, [
-    // Android
-    AndroidConfig.GoogleServices.withClassPath,
-    AndroidConfig.GoogleServices.withApplyPlugin,
-
     // iOS
     (cfg) => withGoogle(cfg, options),
   ]);

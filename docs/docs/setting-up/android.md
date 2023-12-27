@@ -8,30 +8,33 @@ sidebar_position: 3
 This applies to vanilla React Native apps, not Expo.
 :::
 
-### 1. Google project configuration
+## 1. Google project configuration
 
-- Follow [this](./get-config-file.md) guide to get the configuration information.
+- Follow [this](./get-config-file) guide to set up your project and get the configuration information which you'll need later.
 
-#### 1.a - if you're using Firebase
+### Without Firebase
 
-- Place the generated configuration file (`google-services.json`) into project according to [this guide](https://developers.google.com/android/guides/google-services-plugin#adding_the_json_file).
+You don't need to do any more modifications.
 
-Please see [more details here](https://support.google.com/cloud/answer/6158849#installedapplications&android) if needed.
-It's important that OAuth 2.0 android id has fingerprint set correspondingly to the fingerprint of certificate which is used to sign the apk. Also, package name should be the same as apk package name.
+### With Firebase
 
-### 2. Installation
+#### 1. Download the configuration file
 
-1 . Update `android/build.gradle` with
+- Download the configuration file (`google-services.json`) from Firebase into your project according to [this guide](https://developers.google.com/android/guides/google-services-plugin#adding_the_json_file).
+
+#### 2. Update gradle files
+
+Update `android/build.gradle` with
 
 ```groovy title="android/build.gradle"
 buildscript {
     ext {
-        buildToolsVersion = "33.0.0"
-        minSdkVersion = 21
-        compileSdkVersion = 33
-        targetSdkVersion = 33
+        buildToolsVersion = "a.b.c"
+        minSdkVersion = x
+        compileSdkVersion = y
+        targetSdkVersion = z
         // highlight-next-line
-        googlePlayServicesAuthVersion = "19.2.0" // <--- use this version or newer
+        googlePlayServicesAuthVersion = "20.7.0" // <--- use this version or newer
     }
 // ...
     dependencies {
@@ -42,28 +45,22 @@ buildscript {
 }
 ```
 
-2 . Update `android/app/build.gradle` with
+Update `android/app/build.gradle` with
 
 ```groovy title="android/app/build.gradle"
-dependencies {
-    implementation fileTree(dir: "libs", include: ["*.jar"])
-    implementation "com.facebook.react:react-native:+"
-}
-
+apply plugin: "com.android.application"
+apply plugin: "org.jetbrains.kotlin.android"
+apply plugin: "com.facebook.react"
 // highlight-next-line
-apply plugin: 'com.google.gms.google-services' // <--- this should be the last line
+apply plugin: 'com.google.gms.google-services'
 ```
 
-#### Choose Dependency versions (optional)
+This ends the setup for Firebase.
 
-The library depends on `com.google.android.gms:play-services-auth`, as seen in [build.gradle](https://github.com/react-native-community/google-signin/blob/master/android/build.gradle). If needed, you may control their versions by the `ext` closure, as seen in [build.gradle](https://github.com/react-native-community/google-signin/blob/master/example/android/build.gradle) of the example app.
+## Choose Dependency versions (optional)
 
-### 3. Running on simulator
+The library depends on `com.google.android.gms:play-services-auth`, as seen in [build.gradle](https://github.com/react-native-community/google-signin/blob/master/android/build.gradle). If needed, you may control their versions by the `ext` closure, as seen in the code snippet above.
 
-Make sure you have a simulator with Google Play Services installed.
+## Running on simulator or device
 
-To ensure best performance, you should have [HW acceleration](https://developer.android.com/studio/run/emulator-acceleration#accel-vm) working.
-
-### Running on device
-
-Nothing special here, as long as you run your app on an Android device with Google Play Services installed.
+Make sure you have an emulator / device with Google Play Services installed.

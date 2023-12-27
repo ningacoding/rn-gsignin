@@ -4,7 +4,7 @@ sidebar_position: 15
 
 # Obtaining configuration information
 
-Please note that you **do not** need firebase to configure Google Sign In. However, if you use Firebase, it's a little easier to set up the sign in experience because Firebase gives you one file to download and put into your project.
+Please note that you **do not** need Firebase to configure Google Sign In. However, if you use Firebase, it's a little easier to set up the sign in experience because Firebase gives you one file to download and put into your project.
 
 If you're using Expo EAS and Firebase, read [credentials docs](https://docs.expo.dev/app-signing/managed-credentials/#inspecting-credentials-configuration) to learn how to obtain information for [step 2 of the firebase setup](#2-enter-required-information-and-download-the-config-file).
 
@@ -20,9 +20,12 @@ Follow the instructions at ["Get an OAuth client ID"](https://developers.google.
 
 Follow the instructions at ["Configure a Google API Console project"](https://developers.google.com/identity/sign-in/android/start#configure-a-google-api-console-project).
 
+Please see [more details here](https://support.google.com/cloud/answer/6158849#installedapplications&android) if needed.
+It's important that OAuth 2.0 android id has fingerprint set correspondingly to the fingerprint of certificate which is used to sign the apk. Also, package name should be the same as apk package name.
+
 ## WebClientId
 
-`webClientId` can be found [here](https://console.developers.google.com/apis/credentials).
+When done configuring your project, take note of `webClientId` which you may need later. It can be found [here](https://console.developers.google.com/apis/credentials).
 Make sure you select the correct project. `webClientId` should be under OAuth section.
 
 ## With Firebase

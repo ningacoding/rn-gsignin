@@ -11,7 +11,6 @@ buildscript {
         getReactNativeDependencies().each { dependency ->
             classpath(dependency)
         }
-        classpath 'com.google.gms:google-services:4.4.0'
     }
 }
 

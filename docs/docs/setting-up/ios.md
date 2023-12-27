@@ -19,7 +19,7 @@ This applies to vanilla React Native apps, not Expo.
 ### 3. Xcode configuration
 
 - Configure URL types in the `Info` panel (see screenshot)
-  - add a URL with scheme set to your `REVERSED_CLIENT_ID` (found inside `GoogleService-Info.plist`)
+  - add a URL with scheme set to your `REVERSED_CLIENT_ID` (found inside `GoogleService-Info.plist` or Google Cloud console)
 - If you need to support Mac Catalyst, you will need to enable the Keychain Sharing capability on each build target. No keychain groups need to be added.
 
 ![link config](/img/urlTypes.png)
