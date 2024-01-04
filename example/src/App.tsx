@@ -8,6 +8,7 @@ import {
   Image,
   ScrollView,
   SafeAreaView,
+  Clipboard,
 } from 'react-native';
 import {
   GoogleSignin,
@@ -109,7 +110,19 @@ export class GoogleSigninSampleApp extends Component<{}, State> {
         onPress={async () => {
           try {
             const tokens = await GoogleSignin.getTokens();
-            Alert.alert('tokens', prettyJson(tokens));
+            Alert.alert('tokens', prettyJson(tokens), [
+              {
+                text: 'copy ID token',
+                onPress: () => {
+                  Clipboard.setString(tokens.idToken);
+                },
+              },
+              {
+                text: 'Cancel',
+                onPress: () => console.log('Cancel Pressed'),
+                style: 'cancel',
+              },
+            ]);
           } catch (error) {
             const typedError = error as NativeModuleError;
             this.setState({

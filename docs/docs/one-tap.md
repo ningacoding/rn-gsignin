@@ -10,7 +10,7 @@ This is the easiest and recommended way to implement Google Sign In. It is a one
 It is built on top of the [Android Credential Manager](https://developers.google.com/identity/android-credential-manager) and [One Tap](https://developers.google.com/identity/gsi/web/guides/offerings#one_tap) on the Web. On iOS, the provided API is a wrapper of the [iOS Google Sign In SDK](https://developers.google.com/identity/sign-in/ios/start-integrating).
 
 :::tip
-Please note this module is only available to sponsors️. [It takes just a few clicks to get access](install#accessing-the-new-package-for-sponsors) ❤️.
+Please note this functionality is only available to sponsors️. [It takes just a few clicks to get access](install#accessing-the-new-package-for-sponsors) ❤️.
 :::
 
 Note that on iOS and Android, you can combine the one-tap methods with those one from the [Original Google Sign In](original). To do that, use the One-tap sign in to sign in the user. Then call `signInSilently()` and then (for example) `getCurrentUser()` to get the current user's information.
