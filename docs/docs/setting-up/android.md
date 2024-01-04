@@ -5,8 +5,19 @@ sidebar_position: 3
 # Android setup guide
 
 :::warning
-This applies to vanilla React Native apps, not Expo.
+This applies to vanilla React Native apps, not Expo. If you use Expo, please follow [this guide](/setting-up/expo.md).
 :::
+
+### Ensure compatibility
+
+If you're using the sponsor package:
+
+If you're using RN >= 0.73, you're good to go.
+
+But if you're using RN 0.72 or older, you need to either:
+
+- install version `12.1.0` of the package
+- or install version `13` AND specify `compileSdkVersion` 34 in `android/build.gradle` of your project as highlighted below
 
 ## 1. Google project configuration
 
