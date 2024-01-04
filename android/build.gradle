@@ -1,8 +1,13 @@
 buildscript {
+  def kotlin_version = rootProject.ext.has('kotlinVersion') ? rootProject.ext.get('kotlinVersion') : project.properties['RNGS_kotlinVersion']
 
   repositories {
     google()
     mavenCentral()
+  }
+
+  dependencies {
+    classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:${kotlin_version}")
   }
 }
 
@@ -77,4 +82,5 @@ dependencies {
   implementation "com.google.android.libraries.identity.googleid:googleid:1.1.0"
   implementation "androidx.credentials:credentials:1.2.0"
   implementation "androidx.credentials:credentials-play-services-auth:1.2.0"
+  implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.1"
 }
