@@ -7,7 +7,10 @@ import type {
   User,
 } from '../src';
 import type { OneTapUser, statusCodes } from '../src';
-import type { OneTapSignInModule } from '../src/oneTap/types';
+import type {
+  OneTapSignInModule,
+  WebOneTapSignInModule,
+} from '../src/oneTap/types';
 import type { GoogleSignin } from '../src/signIn/GoogleSignin.web';
 import { isErrorWithCode } from '../src/types';
 
@@ -93,6 +96,12 @@ const mockGoogleOneTapSignIn: OneTapSignInModule = {
   signIn: mockSignIn,
   createAccount: mockSignIn,
 };
+const mockWebSignIn: WebOneTapSignInModule['signIn'] = (_params, callbacks) => {
+  callbacks.onSuccess(mockOneTapUserInfo);
+};
+const mockWebGoogleSignIn: WebOneTapSignInModule = {
+  signIn: mockWebSignIn,
+};
 type ExportedModuleType = typeof import('../src/index');
 
 // TODO @vonovak mock closer to native level?
@@ -103,6 +112,7 @@ const mockModule: ExportedModuleType = Object.freeze({
   WebGoogleSigninButton: MockWebGoogleSigninButton,
   GoogleOneTapSignIn: mockGoogleOneTapSignIn,
   isErrorWithCode,
+  WebGoogleOneTapSignIn: mockWebGoogleSignIn,
 });
 
 jest.mock('@react-native-google-signin/google-signin', () => {

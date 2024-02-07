@@ -5,6 +5,8 @@ module.exports = {
     'plugin:prettier/recommended',
     'plugin:jest/recommended',
   ],
-  rules: {},
+  rules: {
+    'no-console': ['error', { allow: ['warn', 'error'] }],
+  },
   ignorePatterns: ['lib/*', 'node_modules/*', '**/build/*'],
 };

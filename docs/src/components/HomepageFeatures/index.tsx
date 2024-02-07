@@ -14,7 +14,7 @@ const FeatureList: FeatureItem[] = [
     Svg: require('@site/static/img/undraw_docusaurus_mountain.svg').default,
     description: (
       <>
-        Supports Android, iOS and Web. <br /> Also works with Expo (requires a
+        Supports Android, iOS and Web. <br /> Also works with Expo (requires
         custom dev client)!
       </>
     ),

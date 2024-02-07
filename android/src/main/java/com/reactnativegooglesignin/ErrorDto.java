@@ -10,10 +10,9 @@ public class ErrorDto {
 
     public ErrorDto(Exception e, String errCodeFallback) {
         // Google's exceptions are not very helpful and error codes can be context-sensitive
-        if (e instanceof ApiException) {
-            ApiException exception = (ApiException) e;
+        String localizedMessage = e.getLocalizedMessage() != null ? e.getLocalizedMessage() : e.getMessage();
+        if (e instanceof ApiException exception) {
             int code = exception.getStatusCode();
-            String localizedMessage = e.getLocalizedMessage();
             // we apply some heuristic to try make the error message more useful
             int minLengthToBeInsightful = 10;
             boolean isInsightful = localizedMessage != null && localizedMessage.length() > minLengthToBeInsightful;
@@ -23,10 +22,10 @@ public class ErrorDto {
             this.message = errorDescription;
         } else if (e instanceof UnsupportedApiCallException) {
             this.code = errCodeFallback;
-            this.message = e.getLocalizedMessage() + " Make sure you have the latest version of Google Play Services installed.";
+            this.message = localizedMessage + " Make sure you have the latest version of Google Play Services installed.";
         } else {
             this.code = errCodeFallback;
-            this.message = e.getLocalizedMessage();
+            this.message = localizedMessage;
         }
     }
 

@@ -5,11 +5,11 @@ import {
   GoogleSigninButton,
   GoogleOneTapSignIn,
   isErrorWithCode,
+  WebGoogleOneTapSignIn,
 } from '@react-native-google-signin/google-signin';
 import { mockOneTapUserInfo, mockUserInfo } from '../../jest/setup';
 import {
   createCancelError,
-  createFlowRestartedError,
   createGoogleSdkNotFoundError,
   createNotShownError,
   createSignOutFailedError,
@@ -31,6 +31,19 @@ describe('GoogleSignin', () => {
       expect(
         await GoogleOneTapSignIn.signOut(mockOneTapUserInfo.user.id),
       ).toBeNull();
+
+      const onSuccess = jest.fn();
+      WebGoogleOneTapSignIn.signIn(
+        {
+          webClientId: 'mockWebClientId',
+        },
+        {
+          onSuccess,
+          onError: jest.fn(),
+        },
+      );
+
+      expect(onSuccess).toHaveBeenCalledWith(mockOneTapUserInfo);
     });
 
     it('status codes', () => {
@@ -77,7 +90,6 @@ describe('GoogleSignin', () => {
     {
       getError: () => createNotShownError('browser_not_supported'),
     },
-    { getError: createFlowRestartedError },
     { getError: createGoogleSdkNotFoundError },
     { getError: createSignOutFailedError },
     // errors from native module do have `code` property as well, but they are kinda impossible to test here

@@ -24,15 +24,13 @@ const signOut: OneTapSignInModule['signOut'] = () => {
 };
 
 /**
- * The entry point of the One-tap Sign In API, exposed as `GoogleOneTapSignIn`. This module uses the [Android Credential Manager](https://developers.google.com/identity/android-credential-manager) under the hood.
+ * The entry point of the One-tap Sign In API, exposed as `GoogleOneTapSignIn`. On Android, this module uses the [Android Credential Manager](https://developers.google.com/identity/android-credential-manager) under the hood.
+ *
+ * On the web, don't call `signIn` / `createAccount` and use the `WebGoogleOneTapSignIn.signIn` instead. The `signOut` method is available on all platforms.
  * @group One-tap sign in module
- *
- *
- * @param _ `momentListener` Optional, only on Web. A callback function that is called when important events take place. [See reference.](https://developers.google.com/identity/gsi/web/reference/js-reference#PromptMomentNotification)
- *
  * */
 export const GoogleOneTapSignIn = {
   signIn,
-  signOut,
   createAccount,
+  signOut,
 } satisfies OneTapSignInModule;

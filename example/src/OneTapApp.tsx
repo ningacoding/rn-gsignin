@@ -1,13 +1,12 @@
-import React, { Component } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
   StyleSheet,
-  Text,
-  View,
   Button,
-  Image,
   ScrollView,
   SafeAreaView,
   Platform,
+  Text,
+  View,
 } from 'react-native';
 import {
   GoogleOneTapSignIn,
@@ -16,153 +15,75 @@ import {
   OneTapUser,
   GoogleSignin,
   WebGoogleSigninButton,
-  OneTapSignInParams,
   GoogleSigninButton,
   isErrorWithCode,
+  WebGoogleOneTapSignIn,
 } from '@react-native-google-signin/google-signin';
 // @ts-ignore see docs/CONTRIBUTING.md for details
 import config from './config/config';
-import {
-  configureGoogleSignIn,
-  PROFILE_IMAGE_SIZE,
-  RenderError,
-} from './components/components';
-
-type State = {
-  userInfo: OneTapUser | undefined;
-  error: NativeModuleError | undefined;
-};
+import { configureGoogleSignIn, RenderError } from './components/components';
+import { OneTapUserInfo } from './components/OneTapUserInfo';
 
 const prettyJson = (value: any) => {
   return JSON.stringify(value, null, 2);
 };
 
-export class OneTapApp extends Component<{}, State> {
-  state: State = {
-    userInfo: undefined,
-    error: undefined,
-  };
+export const OneTapApp = () => {
+  const [userInfoState, setUserInfo] = useState<OneTapUser | null>(null);
+  const [errorState, setErrorState] = useState<NativeModuleError | null>(null);
 
-  render() {
-    const { userInfo } = this.state;
-
-    const body = userInfo ? (
-      this.renderUserInfo(userInfo)
-    ) : (
-      <>
-        <WebGoogleSigninButton
-          webClientId={config.webClientId}
-          onPress={() => {
-            this._signIn();
-          }}
-          onError={(error) => {
-            alert(error.toString());
-          }}
-        />
-        <GoogleSigninButton
-          color={GoogleSigninButton.Color.Dark}
-          onPress={() => {
-            this._signIn();
-          }}
-        />
-        <Button onPress={this._createAccount} title="Sign up with One-tap!" />
-      </>
-    );
-    return (
-      <SafeAreaView style={[styles.pageContainer]}>
-        <ScrollView contentContainerStyle={styles.container}>
-          {Platform.OS !== 'web' && (
-            <>
-              <Button
-                onPress={async () => {
-                  configureGoogleSignIn();
-                  await GoogleSignin.signInSilently();
-                  alert('done');
-                }}
-                title="sign in silently"
-              />
-              <Button
-                onPress={async () => {
-                  const hasPreviousSignIn = GoogleSignin.hasPreviousSignIn();
-                  alert(String(hasPreviousSignIn));
-                }}
-                title="is there a user signed in?"
-              />
-              <Button
-                onPress={async () => {
-                  const userInfo = GoogleSignin.getCurrentUser();
-                  alert(
-                    'current user' + userInfo ? prettyJson(userInfo) : 'null',
-                  );
-                }}
-                title="get current user"
-              />
-            </>
-          )}
-          {body}
-          <RenderError error={this.state.error} />
-        </ScrollView>
-      </SafeAreaView>
-    );
-  }
-
-  renderUserInfo(userInfo: OneTapUser) {
-    return (
-      <View style={styles.container}>
-        <Text style={styles.welcomeText}>Welcome, {userInfo.user.name}</Text>
-        <Text selectable style={{ color: 'black' }}>
-          Your user info:{' '}
-          {prettyJson({
-            ...userInfo,
-            user: {
-              ...userInfo.user,
-              id: userInfo.user.id.slice(0, 5) + '...',
-              photo: `${userInfo.user.photo?.slice(0, 5)}...`,
-            },
-            idToken: `${userInfo.idToken?.slice(0, 5)}...`,
-          })}
-        </Text>
-        {userInfo.user.photo && (
-          <Image
-            style={{ width: PROFILE_IMAGE_SIZE, height: PROFILE_IMAGE_SIZE }}
-            source={{ uri: userInfo.user.photo }}
-          />
-        )}
-
-        <Button onPress={this._signOut} title="Log out" />
-      </View>
-    );
-  }
-
-  _createAccount = async () => {
-    try {
-      const userInfo = await GoogleOneTapSignIn.createAccount({
-        webClientId: config.webClientId,
-        iosClientId: config.iosClientId,
-      });
-      this.setState({ userInfo, error: undefined });
-    } catch (error) {
-      this.handleError(error);
-    }
-  };
-
-  _signIn = async (extraParams?: Omit<OneTapSignInParams, 'webClientId'>) => {
+  const presentOneTapSignIn = useCallback(async () => {
     try {
       const userInfo = await GoogleOneTapSignIn.signIn({
         webClientId: config.webClientId,
         iosClientId: config.iosClientId,
-        ...extraParams,
       });
 
-      this.setState({ userInfo, error: undefined });
+      setUserInfo(userInfo);
+      setErrorState(null);
     } catch (error) {
       setTimeout(() => {
-        this.handleError(error);
+        handleError(error);
       }, 500);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (Platform.OS === 'web') {
+      WebGoogleOneTapSignIn.signIn(
+        {
+          webClientId: config.webClientId,
+        },
+        {
+          onError: (error) => {
+            handleError(error);
+          },
+          onSuccess: (userInfo) => {
+            setUserInfo(userInfo);
+            setErrorState(null);
+          },
+          momentListener: (moment) => {
+            console.log('moment', moment);
+          },
+        },
+      );
+    }
+  }, []);
+
+  const _createAccount = async () => {
+    try {
+      const user = await GoogleOneTapSignIn.createAccount({
+        webClientId: config.webClientId,
+        iosClientId: config.iosClientId,
+      });
+      setUserInfo(user);
+      setErrorState(null);
+    } catch (error) {
+      handleError(error);
     }
   };
 
-  handleError = (error: unknown) => {
+  const handleError = (error: unknown) => {
     if (isErrorWithCode(error)) {
       switch (error.code) {
         case statusCodes.NO_SAVED_CREDENTIAL_FOUND: {
@@ -170,8 +91,7 @@ export class OneTapApp extends Component<{}, State> {
           break;
         }
         case statusCodes.SIGN_IN_CANCELLED:
-          // sign in was cancelled
-          alert('cancelled');
+          // sign in was cancelled, don't do anything
           break;
         case statusCodes.IN_PROGRESS:
           // operation (eg. sign in) already in progress
@@ -179,9 +99,7 @@ export class OneTapApp extends Component<{}, State> {
           break;
         case statusCodes.ONE_TAP_START_FAILED:
           // Android and Web only
-          alert(
-            'failed to present one tap UI, maybe the user closed the popup previously, and you are hitting rate limit.',
-          );
+          alert('failed to present one tap UI:' + error.toString());
           break;
         case statusCodes.PLAY_SERVICES_NOT_AVAILABLE:
           // android only
@@ -190,32 +108,92 @@ export class OneTapApp extends Component<{}, State> {
         default:
           alert('Something went wrong' + error.toString() + error.code);
       }
-      this.setState({
-        error: error,
-      });
+      setErrorState(error);
     } else {
-      alert(`an error that's not related to google sign in occurred`);
+      alert(`an error that's not related to google sign in occurred: ${error}`);
     }
   };
 
-  _signOut = async () => {
+  const _signOut = async () => {
     try {
-      const { userInfo } = this.state;
-
-      if (userInfo) {
-        await GoogleOneTapSignIn.signOut(userInfo.user.id);
-
-        this.setState({ userInfo: undefined, error: undefined });
+      if (userInfoState) {
+        await GoogleOneTapSignIn.signOut(userInfoState.user.id);
+        setUserInfo(null);
+        setErrorState(null);
       }
     } catch (error) {
       const typedError = error as NativeModuleError;
-
-      this.setState({
-        error: typedError,
-      });
+      setErrorState(typedError);
     }
   };
-}
+
+  const body = userInfoState ? (
+    <>
+      <OneTapUserInfo userInfo={userInfoState} signOut={_signOut} />
+    </>
+  ) : (
+    <>
+      <WebGoogleSigninButton
+        onError={(error) => {
+          alert(error.toString());
+        }}
+      />
+      <GoogleSigninButton
+        color={GoogleSigninButton.Color.Dark}
+        onPress={presentOneTapSignIn}
+      />
+      {Platform.OS !== 'web' && (
+        <Button onPress={_createAccount} title="Sign up with One-tap!" />
+      )}
+    </>
+  );
+
+  return (
+    <SafeAreaView style={[styles.pageContainer]}>
+      <ScrollView contentContainerStyle={styles.container}>
+        {body}
+
+        {Platform.OS !== 'web' && (
+          <View
+            style={{
+              padding: 10,
+              borderWidth: 2,
+              borderRadius: 10,
+              borderColor: 'black',
+            }}
+          >
+            <Text>Original GoogleSignIn module interop</Text>
+            <Button
+              onPress={async () => {
+                configureGoogleSignIn();
+                await GoogleSignin.signInSilently();
+                alert('done');
+              }}
+              title="sign in silently"
+            />
+            <Button
+              onPress={async () => {
+                const hasPreviousSignIn = GoogleSignin.hasPreviousSignIn();
+                alert(String(hasPreviousSignIn));
+              }}
+              title="is there a user signed in?"
+            />
+            <Button
+              onPress={async () => {
+                const userInfo = GoogleSignin.getCurrentUser();
+                alert(
+                  'current user' + userInfo ? prettyJson(userInfo) : 'null',
+                );
+              }}
+              title="get current user"
+            />
+          </View>
+        )}
+        <RenderError error={errorState} />
+      </ScrollView>
+    </SafeAreaView>
+  );
+};
 
 const styles = StyleSheet.create({
   container: {
@@ -223,11 +201,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     flexGrow: 1,
   },
-  welcomeText: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 20,
-    color: 'black',
-  },
+
   pageContainer: { flex: 1, backgroundColor: '#F5FCFF' },
 });

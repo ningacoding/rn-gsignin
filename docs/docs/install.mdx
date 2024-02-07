@@ -4,25 +4,30 @@ sidebar_position: 1
 
 # Installation
 
-There are two ways to consume the package: The latest version of the package which:
+There are two ways to consume the package:
 
-✅ supports the new One-tap sign-in on Android, through the [Credential Manager](https://developers.google.com/identity/android-credential-manager) and [Web](https://developers.google.com/identity/gsi/web/guides/features), fully compatible (same API) with iOS
+### Sponsor-Only Version
 
-✅ supports the [React Native New Architecture](https://reactnative.dev/docs/new-architecture-intro)
+Available exclusively to GitHub sponsors, this version offers:
 
-✅ includes various API improvements (synchronous methods and more) and fixes
+✅ One-tap sign-in support for [Android](https://developers.google.com/identity/android-credential-manager) and [Web](https://developers.google.com/identity/gsi/web/guides/features), fully compatible (same API) with iOS
 
-✅ is documented on this website
+✅ Support for the [React Native New Architecture](https://reactnative.dev/docs/new-architecture-intro)
 
-is only available to [GitHub sponsors](https://github.com/sponsors/vonovak) of the maintainer.
+✅ Enhanced API functionalities: synchronous methods and more, plus bugfixes.
 
-When you become a sponsor (using one of the monthly tiers that grant access to the private repo), you will [automatically*](#invitation-note) be given access to the private package and invited to the private repo with the latest version of the package.
+✅ Comprehensive documentation available on this site.
 
-Thank you for supporting continued maintenance and development of this module! ❤️
+Your sponsorship enables continued maintenance and development of the module. Thank you for supporting this project! ❤️
 
-Alternatively, you can install from the public registry which will install an older version without the benefits listed above.
+### Public Version
+
+Available on the public npm registry, this version does not include the features, updates and bugfixes found in the sponsor-only version.
+
 
 ## Accessing the private package for sponsors
+
+[Upon sponsoring](https://github.com/sponsors/vonovak) (using one of the monthly tiers that grant access to the private repo), you will get [immediate access *](#invitation-note) to the private package and to the private repo with the latest version of the package.
 
 Three steps are needed to access the sponsored package, which is hosted on [GitHub npm packages registry](https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-npm-registry).
 
@@ -47,7 +52,7 @@ import TabItem from '@theme/TabItem';
 
   </TabItem>
 
-  <TabItem value="yarn v3" label="yarn v3">
+  <TabItem value="yarn v3+" label="yarn v3+">
     create a `.yarnrc.yml` file in your project root with the following content:
 
 ```yml
@@ -58,8 +63,6 @@ npmScopes:
 ```
 
   </TabItem>
-
-
 
 </Tabs>
 

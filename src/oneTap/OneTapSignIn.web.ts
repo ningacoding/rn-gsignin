@@ -1,79 +1,19 @@
-import type { OneTapSignInModule, OneTapUser } from './types';
-import {
-  createCancelError,
-  createFlowRestartedError,
-  createGoogleSdkNotFoundError,
-  createNotShownError,
-  createSignOutFailedError,
-  statusCodes,
-} from '../errors/errorCodes.web';
-import { extractUser } from './tokenUtils';
+import type { OneTapSignInModule } from './types';
+import { statusCodes } from '@react-native-google-signin/google-signin';
+import { ensureGoogleSdkPresent } from './WebOneTapSignIn.web';
+import { createSignOutFailedError } from '../errors/errorCodes.web';
 
-function ensureGoogleSdkPresent() {
-  if (typeof window !== 'undefined' && !window.google) {
-    throw createGoogleSdkNotFoundError();
-  }
-}
-
-const createAccount: OneTapSignInModule['createAccount'] = (
-  params,
-  momentListener,
-) => {
-  return signIn({ context: 'signup', ...params }, momentListener);
-};
-
-const signIn: OneTapSignInModule['signIn'] = (
-  { webClientId, nonce, autoSignIn, ...otherParams },
-  momentListener,
-) => {
-  return new Promise<OneTapUser>((resolve, reject) => {
-    ensureGoogleSdkPresent();
-    const { google } = window;
-    google.accounts.id.initialize({
-      client_id: webClientId,
-      auto_select: autoSignIn,
-      nonce,
-      context: 'signin',
-      ...otherParams,
-      callback: ({ credential: idToken, select_by }) => {
-        const user = extractUser(idToken);
-        const userInfo: OneTapUser = {
-          user,
-          idToken,
-          credentialOrigin: select_by,
-        };
-        resolve(userInfo);
-      },
-    });
-
-    google.accounts.id.prompt((notification) => {
-      if (notification.isNotDisplayed()) {
-        const err = createNotShownError(notification.getNotDisplayedReason());
-        reject(err);
-      }
-      if (notification.isSkippedMoment()) {
-        const skippedReason = notification.getSkippedReason();
-        if (
-          ['auto_cancel', 'user_cancel', 'tap_outside'].includes(skippedReason)
-        ) {
-          reject(createCancelError(skippedReason));
-        }
-      }
-      if (notification.isDismissedMoment()) {
-        const dismissedReason = notification.getDismissedReason();
-        if (dismissedReason === statusCodes.SIGN_IN_CANCELLED) {
-          reject(createCancelError(dismissedReason));
-        } else if (dismissedReason === statusCodes.IN_PROGRESS) {
-          // TODO not able to reproduce this case
-          reject(createFlowRestartedError());
-        }
-      }
-      momentListener && momentListener(notification);
-    });
+const throwError = async () => {
+  const err = new Error(
+    'GoogleOneTapSignIn is not available on the Web. Use the WebOneTapSignIn module instead.',
+  );
+  Object.assign(err, {
+    code: statusCodes.SIGN_IN_CANCELLED,
   });
+  throw err;
 };
 
-const signOut = async (emailOrUniqueId: string): Promise<null> => {
+const signOutWeb = async (emailOrUniqueId: string): Promise<null> => {
   ensureGoogleSdkPresent();
 
   const {
@@ -94,7 +34,7 @@ const signOut = async (emailOrUniqueId: string): Promise<null> => {
 };
 
 export const GoogleOneTapSignIn: OneTapSignInModule = {
-  signIn,
-  createAccount,
-  signOut,
+  signIn: throwError,
+  createAccount: throwError,
+  signOut: signOutWeb,
 };

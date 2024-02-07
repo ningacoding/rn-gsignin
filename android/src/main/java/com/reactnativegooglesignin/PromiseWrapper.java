@@ -26,7 +26,7 @@ public class PromiseWrapper {
     public void resolve(Object value) {
         Promise resolver = promise;
         if (resolver == null) {
-            Log.w(MODULE_NAME, "cannot resolve promise because it's null");
+            Log.e(MODULE_NAME, "cannot resolve promise because it's null");
             return;
         }
 
@@ -38,7 +38,7 @@ public class PromiseWrapper {
         Promise rejecter = promise;
         String currentNameOfCallInProgress = nameOfCallInProgress;
         if (rejecter == null) {
-            Log.w(MODULE_NAME, "cannot reject promise because it's null");
+            Log.e(MODULE_NAME, "cannot reject promise because it's null");
             return;
         }
 
@@ -49,7 +49,7 @@ public class PromiseWrapper {
         Promise rejecter = promise;
         String currentNameOfCallInProgress = nameOfCallInProgress;
         if (rejecter == null) {
-            Log.w(MODULE_NAME, "cannot reject promise because it's null");
+            Log.e(MODULE_NAME, "cannot reject promise because it's null");
             return;
         }
         ErrorDto dto = new ErrorDto(e, currentNameOfCallInProgress);

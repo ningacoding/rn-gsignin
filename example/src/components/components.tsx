@@ -45,9 +45,9 @@ export const RenderGetCurrentUser = () => {
 export const RenderError = ({
   error,
 }: {
-  error: (Error & { code?: string }) | undefined;
+  error: (Error & { code?: string }) | undefined | null;
 }) => {
-  if (error !== undefined) {
+  if (error != null) {
     // @ts-ignore
     const text = `${error.message} ${
       // @ts-ignore

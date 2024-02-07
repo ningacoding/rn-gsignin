@@ -87,19 +87,53 @@ The following are available on the Web. [Read the value descriptions here](https
 
 • `Const` **GoogleOneTapSignIn**: `Object`
 
-The entry point of the One-tap Sign In API, exposed as `GoogleOneTapSignIn`. This module uses the [Android Credential Manager](https://developers.google.com/identity/android-credential-manager) under the hood.
+The entry point of the One-tap Sign In API, exposed as `GoogleOneTapSignIn`. On Android, this module uses the [Android Credential Manager](https://developers.google.com/identity/android-credential-manager) under the hood.
 
-**`Param`**
-
-`momentListener` Optional, only on Web. A callback function that is called when important events take place. [See reference.](https://developers.google.com/identity/gsi/web/reference/js-reference#PromptMomentNotification)
+On the web, don't call `signIn` / `createAccount` and use the `WebGoogleOneTapSignIn.signIn` instead. The `signOut` method is available on all platforms.
 
 #### Type declaration
 
-| Name            | Type                                                                                                                                                                                       |
-| :-------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `createAccount` | (`params`: [`OneTapSignInParams`](#onetapsigninparams), `momentListener?`: (`promptMomentNotification`: `PromptMomentNotification`) => `void`) => `Promise`\<[`OneTapUser`](#onetapuser)\> |
-| `signIn`        | (`params`: [`OneTapSignInParams`](#onetapsigninparams), `momentListener?`: (`promptMomentNotification`: `PromptMomentNotification`) => `void`) => `Promise`\<[`OneTapUser`](#onetapuser)\> |
-| `signOut`       | (`emailOrUniqueId`: `string`) => `Promise`\<`null`\>                                                                                                                                       |
+| Name            | Type                                                                                                |
+| :-------------- | :-------------------------------------------------------------------------------------------------- |
+| `createAccount` | (`params`: [`OneTapSignInParams`](#onetapsigninparams)) => `Promise`\<[`OneTapUser`](#onetapuser)\> |
+| `signIn`        | (`params`: [`OneTapSignInParams`](#onetapsigninparams)) => `Promise`\<[`OneTapUser`](#onetapuser)\> |
+| `signOut`       | (`emailOrUniqueId`: `string`) => `Promise`\<`null`\>                                                |
+
+---
+
+## Web One-tap sign in module
+
+This is a wrapper for the [Sign In with Google for Web](https://developers.google.com/identity/gsi/web), supporting both the [One-tap](https://developers.google.com/identity/gsi/web/guides/offerings#one_tap) flow and the [Google Sign-In button](https://developers.google.com/identity/gsi/web/guides/offerings#sign_in_with_google_button).
+
+### WebGoogleOneTapSignIn
+
+• `Const` **WebGoogleOneTapSignIn**: `Object`
+
+On the web, call `WebGoogleOneTapSignIn.signIn` on page load or other window events, not as a response to a user interaction.
+
+That sets up a listener for authentication events and calls the appropriate callbacks.
+
+On other platforms, it calls the `onError` callback with a `SIGN_IN_CANCELLED` error.
+
+#### Type declaration
+
+| Name     | Type                                                                                                                                    |
+| :------- | :-------------------------------------------------------------------------------------------------------------------------------------- |
+| `signIn` | (`params`: [`OneTapSignInParams`](#onetapsigninparams), `callbacks`: [`WebOneTapSignInCallbacks`](#webonetapsignincallbacks)) => `void` |
+
+### WebOneTapSignInCallbacks
+
+Ƭ **WebOneTapSignInCallbacks**: `Object`
+
+#### Type declaration
+
+| Name              | Type                                                                       | Description                                                                                                                                                                                                                                                                                                  |
+| :---------------- | :------------------------------------------------------------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `momentListener?` | `MomentListener`                                                           | A callback function that is called when important events take place. See [reference](https://developers.google.com/identity/gsi/web/reference/js-reference#PromptMomentNotification).                                                                                                                        |
+| `onError`         | (`error`: `NativeModuleError`) => `void` \| `Promise`\<`void`\>            | Called when the user cancels the sign-in flow, or when an error occurs. You can use the `code` property of the error to determine the reason for the error. The reported errors on the web are in the same format as the errors reported on the native platforms, so you can reuse your error handling code. |
+| `onSuccess`       | (`userInfo`: [`OneTapUser`](#onetapuser)) => `void` \| `Promise`\<`void`\> | Called when the user successfully signs in, either using the One-tap flow or the button flow.                                                                                                                                                                                                                |
+
+---
 
 ## Original Google sign in
 
@@ -241,18 +275,16 @@ Also inherits [ViewProps](https://reactnative.dev/docs/view#props).
 
 Ƭ **WebGoogleSignInButtonProps**: `Object`
 
-| Name             | Type                                                                  | Description                                                |
-| ---------------- | --------------------------------------------------------------------- | ---------------------------------------------------------- |
-| `webClientId`    | `string`                                                              | Required. The web client ID.                               |
-| `onPress?`       | `() => void`                                                          | Optional. The function to call when the button is pressed. |
-| `type?`          | `"standard"` \| `"icon"`                                              | Optional. The type of the sign-in button.                  |
-| `theme?`         | `"outline"` \| `"filled_blue"` \| `"filled_black"`                    | Optional. The theme of the sign-in button.                 |
-| `size?`          | `"large"` \| `"medium"` \| `"small"`                                  | Optional. The size of the sign-in button.                  |
-| `text?`          | `"signin_with"` \| `"signup_with"` \| `"continue_with"` \| `"signin"` | Optional. The text to display on the sign-in button.       |
-| `shape?`         | `"rectangular"` \| `"pill"` \| `"circle"` \| `"square"`               | Optional. The shape of the sign-in button.                 |
-| `width?`         | `number`                                                              | Optional. The width of the sign-in button.                 |
-| `locale?`        | `string`                                                              | Optional. The locale for the sign-in button.               |
-| `logoAlignment?` | `"left"` \| `"center"`                                                | Optional. The alignment of the logo on the button.         |
+| Name             | Type                                                                  | Description                                          |
+| ---------------- | --------------------------------------------------------------------- | ---------------------------------------------------- |
+| `type?`          | `"standard"` \| `"icon"`                                              | Optional. The type of the sign-in button.            |
+| `theme?`         | `"outline"` \| `"filled_blue"` \| `"filled_black"`                    | Optional. The theme of the sign-in button.           |
+| `size?`          | `"large"` \| `"medium"` \| `"small"`                                  | Optional. The size of the sign-in button.            |
+| `text?`          | `"signin_with"` \| `"signup_with"` \| `"continue_with"` \| `"signin"` | Optional. The text to display on the sign-in button. |
+| `shape?`         | `"rectangular"` \| `"pill"` \| `"circle"` \| `"square"`               | Optional. The shape of the sign-in button.           |
+| `width?`         | `number`                                                              | Optional. The width of the sign-in button.           |
+| `locale?`        | `string`                                                              | Optional. The locale for the sign-in button.         |
+| `logoAlignment?` | `"left"` \| `"center"`                                                | Optional. The alignment of the logo on the button.   |
 
 ---
 

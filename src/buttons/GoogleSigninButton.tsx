@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 
 import { StyleSheet, useColorScheme, ViewProps } from 'react-native';
 import RNGoogleSigninButton from '../spec/SignInButtonNativeComponent';
@@ -34,11 +34,17 @@ export const GoogleSigninButton = ({
 
   const recommendedSize = getSizeStyle(size);
 
+  const stripOnPressParams = useCallback(() => {
+    // this is to make sure that the onPress callback prop is called with no params
+    // as the RNGoogleSigninButton onPress does pass some in here
+    onPress?.();
+  }, [onPress]);
+
   return (
     <RNGoogleSigninButton
       {...rest}
       size={size}
-      onPress={onPress}
+      onPress={stripOnPressParams}
       color={usedColor}
       style={StyleSheet.compose(recommendedSize, style)}
     />

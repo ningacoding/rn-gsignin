@@ -9,8 +9,6 @@ export type WebGoogleSignInButtonProps = Omit<
   'logo_alignment'
 > & {
   logoAlignment?: GsiButtonConfiguration['logo_alignment'];
-  onPress?: () => void;
-  webClientId: string;
   onError?: (error: Error) => void;
 };
 /**

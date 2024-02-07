@@ -35,7 +35,7 @@ class RNOneTapSignInModule(reactContext: ReactApplicationContext) :
       .addCredentialOption(googleIdOption)
       .build()
 
-    CoroutineScope(Dispatchers.Default).launch {
+    CoroutineScope(Dispatchers.IO).launch {
       try {
         val result = credentialManager.getCredential(
           request = request,
@@ -94,7 +94,7 @@ class RNOneTapSignInModule(reactContext: ReactApplicationContext) :
   }
 
   override fun signOut(promise: Promise) {
-    CoroutineScope(Dispatchers.Default).launch {
+    CoroutineScope(Dispatchers.IO).launch {
       try {
         credentialManager.clearCredentialState(ClearCredentialStateRequest())
         promise.resolve(null)
