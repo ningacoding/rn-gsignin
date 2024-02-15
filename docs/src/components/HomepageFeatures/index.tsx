@@ -25,7 +25,7 @@ const FeatureList: FeatureItem[] = [
     description: (
       <>
         Thanks to sponsors, the module receives updates regularly, and comes
-        with this detailed documentation.
+        with this detailed documentation site.
       </>
     ),
   },

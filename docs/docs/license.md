@@ -27,15 +27,15 @@ This License permits the Sponsor to use RNGS in an unlimited number of private o
 
 ## 4. Restrictions
 
-The Sponsor shall not:
+The Sponsor, even after termination of the sponsorship, shall not:
 
 - Re-sell or distribute RNGS, in whole or in part, to any third party.
 - Create a service that allows third parties to use RNGS to build their own products.
-- Develop or distribute a code template, starter kit, or similar developer resource that includes RNGS.
+- Develop or distribute a code template, starter kit, library or similar developer resource that includes RNGS.
 
 ## 5. Termination and Continuing Rights for Past Sponsors
 
-- The License is valid and enforceable as long as the Sponsor maintains their sponsorship status with the Author. Upon termination of the sponsorship, the Sponsor loses the right to receive updates, new versions, or additional materials related to RNGS. However, the Sponsor retains the right to continue using the version of RNGS available to them at the time their sponsorship ended.
+- The License is valid as long as the Sponsor maintains their sponsorship status with the Author. Upon termination of the sponsorship, the Sponsor loses the right to receive updates, new versions, or additional materials related to RNGS. However, sponsor retains the right to continue using the version of RNGS available to them at the time their sponsorship ended. The restrictions in chapter 4. still apply after termination of the sponsorship.
 - This continuing right is non-transferable and is limited to the Sponsor’s internal business use, including use by the Sponsor’s Employees and Contractors for projects initiated during the sponsorship period.
 - The Author reserves the right to revoke this continuing right from any past Sponsor in the event of misuse of RNGS as detailed in the Restrictions section of this License or breach of any other terms of this License.
 

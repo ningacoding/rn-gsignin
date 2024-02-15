@@ -74,7 +74,7 @@ If you're using Expo SDK >= 50, you're good to go.
 But if you're using Expo 49 or older, you need to either:
 
 - install version `12.1.0` of the package
-- or install version `13` AND specify `compileSdkVersion` 34 of your project using [Expo BuildProperties](https://docs.expo.dev/versions/latest/sdk/build-properties/#usage)
+- or install version >= `13` AND specify `compileSdkVersion` 34 of your project using [Expo BuildProperties](https://docs.expo.dev/versions/latest/sdk/build-properties/#usage)
 
 ### Rebuilding the app
 
