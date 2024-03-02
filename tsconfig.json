@@ -1,6 +1,5 @@
 {
   "compilerOptions": {
-    "baseUrl": "./",
     "paths": {
       "@react-native-google-signin/google-signin": ["./src/index"]
     },

@@ -63,7 +63,8 @@
   },
   "homepage": "https://github.com/react-native-google-signin/google-signin#readme",
   "publishConfig": {
-    "registry": "https://npm.pkg.github.com"
+    "registry": "https://npm.pkg.github.com",
+    "access": "restricted"
   },
   "devDependencies": {
     "@babel/eslint-parser": "^7.21.8",
