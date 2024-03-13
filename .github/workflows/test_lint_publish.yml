@@ -19,7 +19,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: lts/*
-      - run: yarn install --frozen-lockfile
+      - run: yarn install
       - run: yarn test
       - run: yarn typescript
       - run: yarn prettier:check
@@ -36,7 +36,7 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: lts/*
-      - run: yarn install --frozen-lockfile
+      - run: yarn install
       - run: yarn release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
