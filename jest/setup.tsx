@@ -94,6 +94,7 @@ const mockSignIn = jest.fn().mockResolvedValue(mockOneTapUserInfo);
 const mockGoogleOneTapSignIn: OneTapSignInModule = {
   signOut: jest.fn().mockResolvedValue(null),
   signIn: mockSignIn,
+  presentExplicitSignIn: mockSignIn,
   createAccount: mockSignIn,
 };
 const mockWebSignIn: WebOneTapSignInModule['signIn'] = (_params, callbacks) => {

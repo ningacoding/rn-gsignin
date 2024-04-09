@@ -1,6 +1,22 @@
-require_relative '../../node_modules/react-native-test-app/test_app'
-
+ws_dir = Pathname.new(__dir__)
+ws_dir = ws_dir.parent until
+  File.exist?("#{ws_dir}/node_modules/react-native-test-app/test_app.rb") ||
+  ws_dir.expand_path.to_s == '/'
+require "#{ws_dir}/node_modules/react-native-test-app/test_app.rb"
 
 workspace 'google-signin-example.xcworkspace'
 
-use_test_app! :hermes_enabled => true
+# fixes for
+# "The following Swift pods cannot yet be integrated as static libraries":
+
+# option 1
+# use_frameworks! :linkage => :static
+
+# option 2
+# use_modular_headers!
+# pod 'GoogleSignIn', :modular_headers => true
+pod 'GTMSessionFetcher', :modular_headers => true
+pod 'AppAuth', :modular_headers => true
+# pod 'RNGoogleSignin', :path => '../../RNGoogleSignin.podspec', :modular_headers => true
+
+use_test_app! :hermes_enabled => true, :bridgeless_enabled => true

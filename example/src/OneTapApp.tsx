@@ -32,8 +32,25 @@ export const OneTapApp = () => {
   const [userInfoState, setUserInfo] = useState<OneTapUser | null>(null);
   const [errorState, setErrorState] = useState<NativeModuleError | null>(null);
 
+  const presentExplicitSignIn = useCallback(async () => {
+    try {
+      await GoogleSignin.hasPlayServices();
+      const userInfo = await GoogleOneTapSignIn.presentExplicitSignIn({
+        webClientId: config.webClientId,
+        iosClientId: config.iosClientId,
+      });
+
+      setUserInfo(userInfo);
+      setErrorState(null);
+    } catch (error) {
+      setTimeout(() => {
+        handleError(error);
+      }, 500);
+    }
+  }, []);
   const presentOneTapSignIn = useCallback(async () => {
     try {
+      await GoogleSignin.hasPlayServices();
       const userInfo = await GoogleOneTapSignIn.signIn({
         webClientId: config.webClientId,
         iosClientId: config.iosClientId,
@@ -132,7 +149,7 @@ export const OneTapApp = () => {
       <OneTapUserInfo userInfo={userInfoState} signOut={_signOut} />
     </>
   ) : (
-    <>
+    <View style={{ gap: 10 }}>
       <WebGoogleSigninButton
         onError={(error) => {
           alert(error.toString());
@@ -140,12 +157,15 @@ export const OneTapApp = () => {
       />
       <GoogleSigninButton
         color={GoogleSigninButton.Color.Dark}
-        onPress={presentOneTapSignIn}
+        onPress={presentExplicitSignIn}
       />
       {Platform.OS !== 'web' && (
-        <Button onPress={_createAccount} title="Sign up with One-tap!" />
+        <>
+          <Button onPress={presentOneTapSignIn} title="Sign in with One-tap!" />
+          <Button onPress={_createAccount} title="Sign up with One-tap!" />
+        </>
       )}
-    </>
+    </View>
   );
 
   return (
@@ -156,9 +176,11 @@ export const OneTapApp = () => {
         {Platform.OS !== 'web' && (
           <View
             style={{
-              padding: 10,
+              margin: 40,
+              padding: 40,
               borderWidth: 2,
               borderRadius: 10,
+              gap: 10,
               borderColor: 'black',
             }}
           >

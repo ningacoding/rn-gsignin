@@ -2,6 +2,7 @@ package com.reactnativegooglesignin
 
 import androidx.credentials.ClearCredentialStateRequest
 import androidx.credentials.CredentialManager
+import androidx.credentials.CredentialOption
 import androidx.credentials.CustomCredential
 import androidx.credentials.GetCredentialRequest
 import androidx.credentials.GetCredentialResponse
@@ -13,6 +14,7 @@ import com.facebook.react.bridge.ReactApplicationContext
 import com.facebook.react.bridge.ReadableMap
 import com.google.android.gms.auth.api.signin.GoogleSignInStatusCodes
 import com.google.android.libraries.identity.googleid.GetGoogleIdOption
+import com.google.android.libraries.identity.googleid.GetSignInWithGoogleOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import com.google.android.libraries.identity.googleid.GoogleIdTokenParsingException
 import kotlinx.coroutines.CoroutineScope
@@ -24,15 +26,23 @@ class RNOneTapSignInModule(reactContext: ReactApplicationContext) :
   private val credentialManager: CredentialManager =
     CredentialManager.create(reactApplicationContext)
 
+  override fun explicitSignIn(params: ReadableMap, promise: Promise) {
+    val explicitRequest = buildExplicitOneTapSignInRequest(params)
+    signInInternal(explicitRequest, promise)
+  }
   override fun signIn(params: ReadableMap, promise: Promise) {
+    val googleIdOption = buildOneTapSignInRequest(params)
+    signInInternal(googleIdOption, promise)
+  }
+
+  private fun signInInternal(credentialOption: CredentialOption, promise: Promise, ) {
     val activity = currentActivity
     if (activity == null) {
       RNGoogleSigninModule.rejectWithNullActivity(promise)
       return
     }
-    val googleIdOption = buildOneTapSignInRequest(params)
     val request: GetCredentialRequest = GetCredentialRequest.Builder()
-      .addCredentialOption(googleIdOption)
+      .addCredentialOption(credentialOption)
       .build()
 
     CoroutineScope(Dispatchers.IO).launch {
@@ -54,10 +64,12 @@ class RNOneTapSignInModule(reactContext: ReactApplicationContext) :
         promise.reject(GoogleSignInStatusCodes.SIGN_IN_CANCELLED.toString(), e.message, e)
       }
       is NoCredentialException -> {
-        if (e.message?.contains("too many canceled sign-in prompts") == true) {
-          promise.reject(ONE_TAP_START_FAILED, e.message, e)
-        } else if (e.message?.contains("Cannot find a matching credential") == true) {
-          promise.reject(NO_SAVED_CREDENTIAL_FOUND, e.message, e)
+        if (e.type == android.credentials.GetCredentialException.TYPE_NO_CREDENTIAL) {
+          if (e.message?.contains("too many canceled sign-in prompts") == true) {
+            promise.reject(ONE_TAP_START_FAILED, e.message, e)
+          } else {
+            promise.reject(NO_SAVED_CREDENTIAL_FOUND, e.message, e)
+          }
         } else {
           promise.reject(e.type, e.message, e)
         }
@@ -121,6 +133,15 @@ class RNOneTapSignInModule(reactContext: ReactApplicationContext) :
       .setServerClientId(webClientId)
       .setNonce(nonce)
       .setAutoSelectEnabled(autoSignIn)
+      .build()
+  }
+  private fun buildExplicitOneTapSignInRequest(
+    params: ReadableMap
+  ): GetSignInWithGoogleOption {
+    val webClientId = params.getString("webClientId")!!
+    val nonce = params.getString("nonce")
+    return GetSignInWithGoogleOption.Builder(webClientId)
+      .setNonce(nonce)
       .build()
   }
 }

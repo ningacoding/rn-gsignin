@@ -36,6 +36,7 @@ export type OneTapUser = {
 
 export type OneTapSignInModule = {
   signIn: (params: OneTapSignInParams) => Promise<OneTapUser>;
+  presentExplicitSignIn: (params: OneTapSignInParams) => Promise<OneTapUser>;
   createAccount: (params: OneTapSignInParams) => Promise<OneTapUser>;
   signOut: (emailOrUniqueId: string) => Promise<null>;
 };

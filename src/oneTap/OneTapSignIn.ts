@@ -8,6 +8,15 @@ const signIn: OneTapSignInModule['signIn'] = (params): Promise<OneTapUser> => {
     ...params,
   }) as Promise<OneTapUser>;
 };
+const presentExplicitSignIn: OneTapSignInModule['presentExplicitSignIn'] = (
+  params,
+): Promise<OneTapUser> => {
+  return OneTapNativeModule.explicitSignIn({
+    autoSignIn: true,
+    filterByAuthorizedAccounts: true,
+    ...params,
+  }) as Promise<OneTapUser>;
+};
 const createAccount: OneTapSignInModule['createAccount'] = (
   params,
 ): Promise<OneTapUser> => {
@@ -33,4 +42,5 @@ export const GoogleOneTapSignIn = {
   signIn,
   createAccount,
   signOut,
+  presentExplicitSignIn,
 } satisfies OneTapSignInModule;

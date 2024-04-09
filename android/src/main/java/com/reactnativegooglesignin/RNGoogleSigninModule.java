@@ -49,29 +49,27 @@ import java.lang.ref.WeakReference;
 import java.util.HashMap;
 import java.util.Map;
 
-
 public class RNGoogleSigninModule extends NativeGoogleSigninSpec {
     private GoogleSignInClient _apiClient;
 
     public static final int RC_SIGN_IN = 9001;
     public static final int REQUEST_CODE_RECOVER_AUTH = 53294;
     public static final int REQUEST_CODE_ADD_SCOPES = 53295;
-    public static final String MODULE_NAME = NativeGoogleSigninSpec.NAME;
     public static final String PLAY_SERVICES_NOT_AVAILABLE = "PLAY_SERVICES_NOT_AVAILABLE";
     private static final String SHOULD_RECOVER = "SHOULD_RECOVER";
 
     private PendingAuthRecovery pendingAuthRecovery;
 
-    private PromiseWrapper promiseWrapper = new PromiseWrapper(NativeGoogleSigninSpec.NAME);
+    private final PromiseWrapper signInOrAddScopesPromiseWrapper = new PromiseWrapper(NativeGoogleSigninSpec.NAME);
+    private final PromiseWrapper silentSignInPromiseWrapper = new PromiseWrapper(NativeGoogleSigninSpec.NAME);
+    private final PromiseWrapper tokenRetrievalPromiseWrapper = new PromiseWrapper(NativeGoogleSigninSpec.NAME);
+    private final PromiseWrapper tokenClearingPromiseWrapper = new PromiseWrapper(NativeGoogleSigninSpec.NAME);
 
-    public PromiseWrapper getPromiseWrapper() {
-        return promiseWrapper;
+    public PromiseWrapper getTokenClearingPromiseWrapper() {
+        return tokenClearingPromiseWrapper;
     }
-
-    @NonNull
-    @Override
-    public String getName() {
-        return MODULE_NAME;
+    public PromiseWrapper getTokenRetrievalPromiseWrapper() {
+        return tokenRetrievalPromiseWrapper;
     }
 
     public RNGoogleSigninModule(final ReactApplicationContext reactContext) {
@@ -101,7 +99,7 @@ public class RNGoogleSigninModule extends NativeGoogleSigninSpec {
         Activity activity = getCurrentActivity();
 
         if (activity == null) {
-            Log.w(MODULE_NAME, "could not determine playServicesAvailable, activity is null");
+            Log.w(NAME, "could not determine playServicesAvailable, activity is null");
             rejectWithNullActivity(promise);
             return;
         }
@@ -121,7 +119,7 @@ public class RNGoogleSigninModule extends NativeGoogleSigninSpec {
     }
 
     static void rejectWithNullActivity(Promise promise) {
-        promise.reject(MODULE_NAME, "activity is null");
+        promise.reject(NAME, "activity is null");
     }
 
     @ReactMethod
@@ -147,19 +145,19 @@ public class RNGoogleSigninModule extends NativeGoogleSigninSpec {
             rejectWithNullClientError(promise);
             return;
         }
-        promiseWrapper.setPromiseWithInProgressCheck(promise, "signInSilently");
+        silentSignInPromiseWrapper.setPromiseWithInProgressCheck(promise, "signInSilently");
         UiThreadUtil.runOnUiThread(() -> {
             Task<GoogleSignInAccount> result = _apiClient.silentSignIn();
             if (result.isSuccessful()) {
-                // There's immediate result available.
-                handleSignInTaskResult(result);
+                // There's an immediate result available.
+                handleSignInTaskResult(result, silentSignInPromiseWrapper);
             } else {
-                result.addOnCompleteListener((OnCompleteListener) task -> handleSignInTaskResult(task));
+                result.addOnCompleteListener((OnCompleteListener) task -> handleSignInTaskResult(task, silentSignInPromiseWrapper));
             }
         });
     }
 
-    private void handleSignInTaskResult(Task<GoogleSignInAccount> result) {
+    private void handleSignInTaskResult(Task<GoogleSignInAccount> result, final PromiseWrapper promiseWrapper) {
         try {
             GoogleSignInAccount account = result.getResult(ApiException.class);
             if (account == null) {
@@ -186,7 +184,7 @@ public class RNGoogleSigninModule extends NativeGoogleSigninSpec {
             rejectWithNullActivity(promise);
             return;
         }
-        promiseWrapper.setPromiseWithInProgressCheck(promise, "signIn");
+        signInOrAddScopesPromiseWrapper.setPromiseWithInProgressCheck(promise, "signIn");
         UiThreadUtil.runOnUiThread(() -> {
             Intent signInIntent = _apiClient.getSignInIntent();
             activity.startActivityForResult(signInIntent, RC_SIGN_IN);
@@ -205,7 +203,7 @@ public class RNGoogleSigninModule extends NativeGoogleSigninSpec {
         promise.resolve(false);
         return;
       }
-      promiseWrapper.setPromiseWithInProgressCheck(promise, "addScopes");
+      signInOrAddScopesPromiseWrapper.setPromiseWithInProgressCheck(promise, "addScopes");
 
       ReadableArray scopes = config.getArray("scopes");
       Scope[] scopeArr = new Scope[scopes.size()];
@@ -223,18 +221,18 @@ public class RNGoogleSigninModule extends NativeGoogleSigninSpec {
             if (requestCode == RC_SIGN_IN) {
                 // The Task returned from this call is always completed, no need to attach a listener.
                 Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(intent);
-                handleSignInTaskResult(task);
+                handleSignInTaskResult(task, signInOrAddScopesPromiseWrapper);
             } else if (requestCode == REQUEST_CODE_RECOVER_AUTH) {
                 if (resultCode == Activity.RESULT_OK) {
                     rerunFailedAuthTokenTask();
                 } else {
-                    promiseWrapper.reject("Failed authentication recovery attempt, probably user-rejected.");
+                    tokenRetrievalPromiseWrapper.reject("Failed authentication recovery attempt, probably user-rejected.");
                 }
             } else if (requestCode == REQUEST_CODE_ADD_SCOPES) {
                 if (resultCode == Activity.RESULT_OK) {
-                  promiseWrapper.resolve(true);
+                  signInOrAddScopesPromiseWrapper.resolve(true);
                 } else {
-                  promiseWrapper.reject("Failed to add scopes.");
+                  signInOrAddScopesPromiseWrapper.reject("Failed to add scopes.");
                 }
             }
         }
@@ -246,7 +244,7 @@ public class RNGoogleSigninModule extends NativeGoogleSigninSpec {
             new AccessTokenRetrievalTask(this).execute(userProperties, null);
         } else {
             // this is unlikely to happen, since we set the pendingRecovery in AccessTokenRetrievalTask
-            promiseWrapper.reject("rerunFailedAuthTokenTask: recovery failed");
+            tokenRetrievalPromiseWrapper.reject("rerunFailedAuthTokenTask: recovery failed");
         }
     }
 
@@ -296,7 +294,7 @@ public class RNGoogleSigninModule extends NativeGoogleSigninSpec {
 
     @ReactMethod
     public void clearCachedAccessToken(String tokenToClear, Promise promise) {
-        promiseWrapper.setPromiseWithInProgressCheck(promise, "clearCachedAccessToken");
+        tokenClearingPromiseWrapper.setPromiseWithInProgressCheck(promise, "clearCachedAccessToken");
         new TokenClearingTask(this).execute(tokenToClear);
     }
 
@@ -308,7 +306,7 @@ public class RNGoogleSigninModule extends NativeGoogleSigninSpec {
             return;
         }
 
-        promiseWrapper.setPromiseWithInProgressCheck(promise, "getTokens");
+        tokenRetrievalPromiseWrapper.setPromiseWithInProgressCheck(promise, "getTokens");
         startTokenRetrievalTaskWithRecovery(account);
     }
 
@@ -321,7 +319,7 @@ public class RNGoogleSigninModule extends NativeGoogleSigninSpec {
 
     private static class AccessTokenRetrievalTask extends AsyncTask<WritableMap, Void, Void> {
 
-        private WeakReference<RNGoogleSigninModule> weakModuleRef;
+        private final WeakReference<RNGoogleSigninModule> weakModuleRef;
 
         AccessTokenRetrievalTask(RNGoogleSigninModule module) {
             this.weakModuleRef = new WeakReference<>(module);
@@ -336,7 +334,7 @@ public class RNGoogleSigninModule extends NativeGoogleSigninSpec {
             }
             try {
                 insertAccessTokenIntoUserProperties(moduleInstance, userProperties);
-                moduleInstance.getPromiseWrapper().resolve(userProperties);
+                moduleInstance.getTokenRetrievalPromiseWrapper().resolve(userProperties);
             } catch (Exception e) {
                 WritableMap recoverySettings = params.length >= 2 ? params[1] : null;
                 handleException(moduleInstance, e, userProperties, recoverySettings);
@@ -363,10 +361,10 @@ public class RNGoogleSigninModule extends NativeGoogleSigninSpec {
                 if (shouldRecover) {
                     attemptRecovery(moduleInstance, cause, userProperties);
                 } else {
-                    moduleInstance.promiseWrapper.reject(cause);
+                    moduleInstance.getTokenRetrievalPromiseWrapper().reject(cause);
                 }
             } else {
-                moduleInstance.promiseWrapper.reject(cause);
+                moduleInstance.getTokenRetrievalPromiseWrapper().reject(cause);
             }
         }
 
@@ -374,7 +372,7 @@ public class RNGoogleSigninModule extends NativeGoogleSigninSpec {
             Activity activity = moduleInstance.getCurrentActivity();
             if (activity == null) {
                 moduleInstance.pendingAuthRecovery = null;
-                moduleInstance.promiseWrapper.reject("Cannot attempt recovery auth because app is not in foreground. "
+                moduleInstance.getTokenRetrievalPromiseWrapper().reject("Cannot attempt recovery auth because app is not in foreground. "
                                 + e.getLocalizedMessage());
             } else {
                 moduleInstance.pendingAuthRecovery = new PendingAuthRecovery(userProperties);
@@ -387,7 +385,7 @@ public class RNGoogleSigninModule extends NativeGoogleSigninSpec {
 
     private static class TokenClearingTask extends AsyncTask<String, Void, Void> {
 
-        private WeakReference<RNGoogleSigninModule> weakModuleRef;
+        private final WeakReference<RNGoogleSigninModule> weakModuleRef;
 
         TokenClearingTask(RNGoogleSigninModule module) {
             this.weakModuleRef = new WeakReference<>(module);
@@ -399,18 +397,19 @@ public class RNGoogleSigninModule extends NativeGoogleSigninSpec {
             if (moduleInstance == null) {
                 return null;
             }
+            PromiseWrapper promiseWrapper = moduleInstance.getTokenClearingPromiseWrapper();
             try {
                 GoogleAuthUtil.clearToken(moduleInstance.getReactApplicationContext(), tokenToClear[0]);
-                moduleInstance.getPromiseWrapper().resolve(null);
+                promiseWrapper.resolve(null);
             } catch (Exception e) {
-                moduleInstance.promiseWrapper.reject(e);
+                promiseWrapper.reject(e);
             }
             return null;
         }
     }
 
     private void rejectWithNullClientError(Promise promise) {
-        promise.reject(MODULE_NAME, "apiClient is null - call configure first");
+        promise.reject(NAME, "apiClient is null - call configure() first");
     }
 
 }

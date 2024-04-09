@@ -19,5 +19,6 @@ const signIn: OneTapSignInModule['signIn'] = async (params) => {
 export const GoogleOneTapSignIn: OneTapSignInModule = {
   signIn,
   createAccount: signIn,
+  presentExplicitSignIn: signIn,
   signOut: GoogleSignin.signOut,
 };

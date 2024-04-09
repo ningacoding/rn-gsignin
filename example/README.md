@@ -20,3 +20,9 @@ export default {
 - Start Metro bundler with `yarn start`
 - iOS: open the project in Xcode (run `xed ios` in the `example/` directory) and run the app
 - Android: open the `build.gradle` file in `example/android/` directory and run the app
+
+### Unlinking example app from a Google Account
+
+- unlink at https://myaccount.google.com/connections
+- delete the storage of the Google play services app
+- wait a bit

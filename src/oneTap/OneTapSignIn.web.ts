@@ -35,6 +35,7 @@ const signOutWeb = async (emailOrUniqueId: string): Promise<null> => {
 
 export const GoogleOneTapSignIn: OneTapSignInModule = {
   signIn: throwError,
+  presentExplicitSignIn: throwError,
   createAccount: throwError,
   signOut: signOutWeb,
 };

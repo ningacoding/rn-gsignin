@@ -5,7 +5,19 @@ import React from 'react';
 import config from '../config/config';
 
 export const prettyJson = (value: any) => {
-  return JSON.stringify(value, null, 2);
+  function sort(object: any) {
+    if (!object || typeof object !== 'object' || object instanceof Array)
+      return object;
+    const keys = Object.keys(object);
+    keys.sort();
+    const newObject = {};
+    for (let i = 0; i < keys.length; i++) {
+      // @ts-ignore
+      newObject[keys[i]] = sort(object[keys[i]]);
+    }
+    return newObject;
+  }
+  return JSON.stringify(sort(value), null, 2);
 };
 
 export const PROFILE_IMAGE_SIZE = 150;

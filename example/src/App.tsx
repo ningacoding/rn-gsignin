@@ -128,7 +128,7 @@ export class GoogleSigninSampleApp extends Component<{}, State> {
             this.setState({
               error: typedError,
             });
-            Alert.alert('error', String(error));
+            Alert.alert('error', typedError.message);
           }
         }}
         title="get tokens"
@@ -167,10 +167,13 @@ export class GoogleSigninSampleApp extends Component<{}, State> {
       this.setState({ userInfo, error: undefined });
     } catch (error) {
       if (isErrorWithCode(error)) {
+        console.log('error', error.message);
         switch (error.code) {
           case statusCodes.SIGN_IN_CANCELLED:
             // sign in was cancelled by user
-            Alert.alert('cancelled');
+            setTimeout(() => {
+              Alert.alert('cancelled');
+            }, 500);
             break;
           case statusCodes.IN_PROGRESS:
             // operation (eg. sign in) already in progress

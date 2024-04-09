@@ -16,6 +16,7 @@ import com.facebook.react.uimanager.ViewManagerDelegate;
 import com.facebook.react.uimanager.annotations.ReactProp;
 import com.google.android.gms.common.SignInButton;
 
+import java.util.HashMap;
 import java.util.Map;
 
 public class RNGoogleSigninButtonViewManager extends SimpleViewManager<SignInButton> implements RNGoogleSigninButtonManagerInterface<SignInButton> {
@@ -34,13 +35,17 @@ public class RNGoogleSigninButtonViewManager extends SimpleViewManager<SignInBut
 
     @Override
     public Map<String, Object> getExportedCustomBubblingEventTypeConstants() {
-        return MapBuilder.<String, Object>builder().put(
+        // fabric doesn't seem to need this but paper does
+        Map<String, Object> baseEvents = super.getExportedCustomBubblingEventTypeConstants();
+        Map<String, Object> eventTypeConstants = baseEvents == null ? new HashMap<>() : baseEvents;
+        eventTypeConstants.put(
             EVENT_NAME,
             MapBuilder.of(
                 "phasedRegistrationNames",
                 MapBuilder.of("bubbled", "onPress")
             )
-        ).build();
+        );
+        return eventTypeConstants;
     }
 
     @NonNull
