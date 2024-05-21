@@ -1,6 +1,6 @@
 import type { TurboModule } from 'react-native';
 import { TurboModuleRegistry } from 'react-native';
-import { OneTapUser } from '@react-native-google-signin/google-signin';
+import type { OneTapUser } from '../oneTap/types';
 
 export interface Spec extends TurboModule {
   signIn(params: {
