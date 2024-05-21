@@ -187,7 +187,7 @@ export class GoogleSigninSampleApp extends Component<{}, State> {
             Alert.alert('play services not available or outdated');
             break;
           default:
-            Alert.alert('Something went wrong', error.toString());
+            Alert.alert('Something went wrong: ', error.toString());
         }
         this.setState({
           error,

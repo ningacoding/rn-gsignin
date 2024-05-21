@@ -22,6 +22,7 @@ export interface Spec extends TurboModule {
     IN_PROGRESS: string;
     PLAY_SERVICES_NOT_AVAILABLE: string;
     SIGN_IN_REQUIRED: string;
+    SCOPES_ALREADY_GRANTED: string;
     BUTTON_SIZE_ICON: number;
     BUTTON_SIZE_WIDE: number;
     BUTTON_SIZE_STANDARD: number;

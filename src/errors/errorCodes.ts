@@ -8,7 +8,10 @@ const {
   SIGN_IN_REQUIRED,
   ONE_TAP_START_FAILED,
   NO_SAVED_CREDENTIAL_FOUND,
+  SCOPES_ALREADY_GRANTED,
 } = NativeModule.getConstants();
+
+export const ios_only_SCOPES_ALREADY_GRANTED = SCOPES_ALREADY_GRANTED;
 
 /**
  * @group Constants

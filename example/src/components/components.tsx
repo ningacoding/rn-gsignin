@@ -1,5 +1,8 @@
 import { Alert, Button, Text } from 'react-native';
-import { GoogleSignin } from '@react-native-google-signin/google-signin';
+import {
+  GoogleSignin,
+  statusCodes,
+} from '@react-native-google-signin/google-signin';
 import React from 'react';
 // @ts-ignore see docs/CONTRIBUTING.md for details
 import config from '../config/config';
@@ -60,11 +63,10 @@ export const RenderError = ({
   error: (Error & { code?: string }) | undefined | null;
 }) => {
   if (error != null) {
-    // @ts-ignore
-    const text = `${error.message} ${
-      // @ts-ignore
-      error.code ? `code: ${error.code}` : ''
-    }`;
+    const text =
+      error.code === statusCodes.SIGN_IN_CANCELLED
+        ? `User cancelled the action`
+        : `${error.message} ${error.code ? `code: ${error.code}` : ''}`;
     return (
       <Text selectable style={{ color: 'black' }}>
         {text}

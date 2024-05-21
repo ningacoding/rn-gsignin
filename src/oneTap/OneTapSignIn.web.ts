@@ -1,4 +1,4 @@
-import type { OneTapSignInModule } from './types';
+import { OneTapSignInModule } from './types';
 import { statusCodes } from '@react-native-google-signin/google-signin';
 import { ensureGoogleSdkPresent } from './WebOneTapSignIn.web';
 import { createSignOutFailedError } from '../errors/errorCodes.web';
@@ -37,5 +37,6 @@ export const GoogleOneTapSignIn: OneTapSignInModule = {
   signIn: throwError,
   presentExplicitSignIn: throwError,
   createAccount: throwError,
+  requestAuthorization: throwError,
   signOut: signOutWeb,
 };

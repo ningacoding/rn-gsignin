@@ -11,9 +11,5 @@ export {
 } from './buttons/WebGoogleSigninButton';
 export * from './types';
 export { GoogleOneTapSignIn } from './oneTap/OneTapSignIn';
-export type {
-  OneTapUser,
-  OneTapSignInParams,
-  WebOneTapSignInCallbacks,
-} from './oneTap/types';
+export type * from './oneTap/types';
 export { WebGoogleOneTapSignIn } from './oneTap/WebOneTapSignIn';

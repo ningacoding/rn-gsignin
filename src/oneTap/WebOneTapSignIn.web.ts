@@ -32,6 +32,7 @@ const signIn: WebOneTapSignInModule['signIn'] = (
       const userInfo: OneTapUser = {
         user,
         idToken,
+        serverAuthCode: null,
         credentialOrigin: select_by,
       };
       onSuccess(userInfo);

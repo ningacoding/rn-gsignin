@@ -99,7 +99,8 @@ public abstract class NativeGoogleSigninSpec extends ReactContextBaseJavaModule 
         "ONE_TAP_START_FAILED",
         "PLAY_SERVICES_NOT_AVAILABLE",
         "SIGN_IN_CANCELLED",
-        "SIGN_IN_REQUIRED"
+        "SIGN_IN_REQUIRED",
+        "SCOPES_ALREADY_GRANTED"
       ));
       Set<String> optionalFlowConstants = new HashSet<>();
       Set<String> undeclaredConstants = new HashSet<>(constants.keySet());

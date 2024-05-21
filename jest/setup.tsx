@@ -1,10 +1,12 @@
 import React from 'react';
 import { Pressable, Text } from 'react-native';
-import type {
+import {
   GoogleSigninButton,
   GoogleSigninButtonProps,
   WebGoogleSignInButtonProps,
   User,
+  AuthorizationResponse,
+  RequestAuthorizationParams,
 } from '../src';
 import type { OneTapUser, statusCodes } from '../src';
 import type {
@@ -88,6 +90,7 @@ export const mockOneTapUserInfo: OneTapUser = {
   },
   idToken: 'mockIdToken',
   credentialOrigin: 'user',
+  serverAuthCode: null,
 };
 const mockSignIn = jest.fn().mockResolvedValue(mockOneTapUserInfo);
 
@@ -96,6 +99,16 @@ const mockGoogleOneTapSignIn: OneTapSignInModule = {
   signIn: mockSignIn,
   presentExplicitSignIn: mockSignIn,
   createAccount: mockSignIn,
+  requestAuthorization: jest
+    .fn()
+    .mockImplementation(({ scopes }: RequestAuthorizationParams) => {
+      const resp: AuthorizationResponse = {
+        grantedScopes: scopes,
+        accessToken: 'mockAccessToken',
+        serverAuthCode: null,
+      };
+      return Promise.resolve(resp);
+    }),
 };
 const mockWebSignIn: WebOneTapSignInModule['signIn'] = (_params, callbacks) => {
   callbacks.onSuccess(mockOneTapUserInfo);

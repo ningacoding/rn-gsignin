@@ -26,7 +26,8 @@
     ],
     "ios": [
       "dist/assets",
-      "dist/main.ios.jsbundle"
+      "dist/main.ios.jsbundle",
+      "src/config/GoogleService-Info.plist"
     ],
     "macos": [
       "dist/assets",

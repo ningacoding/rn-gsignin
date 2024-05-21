@@ -29,8 +29,22 @@ describe('GoogleSignin', () => {
         }),
       ).toStrictEqual(mockOneTapUserInfo);
       expect(
+        await GoogleOneTapSignIn.presentExplicitSignIn({
+          webClientId: 'mockWebClientId',
+        }),
+      ).toStrictEqual(mockOneTapUserInfo);
+      expect(
         await GoogleOneTapSignIn.signOut(mockOneTapUserInfo.user.id),
       ).toBeNull();
+      expect(
+        await GoogleOneTapSignIn.requestAuthorization({
+          scopes: ['mockScope'],
+        }),
+      ).toEqual({
+        accessToken: 'mockAccessToken',
+        grantedScopes: ['mockScope'],
+        serverAuthCode: null,
+      });
 
       const onSuccess = jest.fn();
       WebGoogleOneTapSignIn.signIn(

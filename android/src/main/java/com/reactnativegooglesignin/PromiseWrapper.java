@@ -35,15 +35,18 @@ public class PromiseWrapper {
     }
 
     public void reject(String message) {
+        reject(nameOfCallInProgress, message);
+    }
+
+    public void reject(String code, String message) {
         Promise rejecter = promise;
-        String currentNameOfCallInProgress = nameOfCallInProgress;
         if (rejecter == null) {
             Log.e(MODULE_NAME, "cannot reject promise because it's null");
             return;
         }
 
         resetMembers();
-        rejecter.reject(currentNameOfCallInProgress, message);
+        rejecter.reject(code, message);
     }
     public void reject(Exception e) {
         Promise rejecter = promise;

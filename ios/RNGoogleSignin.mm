@@ -34,6 +34,7 @@ static NSString *const kClientIdKey = @"CLIENT_ID";
            @"BUTTON_SIZE_WIDE": @(kGIDSignInButtonStyleWide),
            @"SIGN_IN_CANCELLED": [@(kGIDSignInErrorCodeCanceled) stringValue],
            @"SIGN_IN_REQUIRED": [@(kGIDSignInErrorCodeHasNoAuthInKeychain) stringValue],
+           @"SCOPES_ALREADY_GRANTED": [@(kGIDSignInErrorCodeScopesAlreadyGranted) stringValue],
            @"IN_PROGRESS": ASYNC_OP_IN_PROGRESS,
            // these never happen on iOS
            PLAY_SERVICES_NOT_AVAILABLE: PLAY_SERVICES_NOT_AVAILABLE,
@@ -51,7 +52,8 @@ static NSString *const kClientIdKey = @"CLIENT_ID";
                   .SIGN_IN_CANCELLED = [@(kGIDSignInErrorCodeCanceled) stringValue],
                   .SIGN_IN_REQUIRED = [@(kGIDSignInErrorCodeHasNoAuthInKeychain) stringValue],
                   .IN_PROGRESS = ASYNC_OP_IN_PROGRESS,
-              
+                  .SCOPES_ALREADY_GRANTED = [@(kGIDSignInErrorCodeScopesAlreadyGranted) stringValue],
+
                   // these never happen on iOS
                   .PLAY_SERVICES_NOT_AVAILABLE = PLAY_SERVICES_NOT_AVAILABLE,
                   .NO_SAVED_CREDENTIAL_FOUND = NO_SAVED_CREDENTIAL_FOUND,
@@ -240,23 +242,10 @@ RCT_EXPORT_METHOD(getTokens:(RCTPromiseResolveBlock)resolve
                            @"user": userInfo,
                            @"idToken": user.idToken.tokenString,
                            @"serverAuthCode": RCTNullIfNil(serverAuthCode),
-                           @"scopes": [self grantedScopesSanitized:user],
+                           @"scopes": user.grantedScopes,
                            };
   return params;
 }
-
-- (NSArray<NSString *> *)grantedScopesSanitized: (GIDGoogleUser *) user {
-  // this is here so that the result is more similar to what android returns
-  NSMutableArray<NSString*>* scopes = [NSMutableArray arrayWithArray:user.grantedScopes];
-  if ([scopes containsObject:@"https://www.googleapis.com/auth/userinfo.profile"]) {
-    [scopes addObject:@"profile"];
-  }
-  if ([scopes containsObject:@"https://www.googleapis.com/auth/userinfo.email"]) {
-    [scopes addObject:@"email"];
-  }
-  return scopes;
-}
-
 
 - (void)handleCompletion: (GIDSignInResult * _Nullable) signInResult withError: (NSError * _Nullable) error withResolver: (RCTPromiseResolveBlock) resolve withRejector: (RCTPromiseRejectBlock) reject fromCallsite: (NSString *) from {
   [self handleCompletion:signInResult.user serverAuthCode:signInResult.serverAuthCode withError:error withResolver:resolve withRejector:reject fromCallsite:from];
@@ -284,7 +273,7 @@ RCT_EXPORT_METHOD(getTokens:(RCTPromiseResolveBlock)resolve
       errorMessage = @"A problem reading or writing to the application keychain.";
       break;
     case kGIDSignInErrorCodeHasNoAuthInKeychain:
-      errorMessage = @"The user has never signed in before with the given scopes, or they have since signed out.";
+      errorMessage = @"The user has never signed in before, or they have since signed out.";
       break;
     case kGIDSignInErrorCodeCanceled:
       errorMessage = @"The user canceled the sign in request.";

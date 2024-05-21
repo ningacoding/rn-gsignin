@@ -85,6 +85,7 @@ public class RNGoogleSigninModule extends NativeGoogleSigninSpec {
         constants.put("BUTTON_SIZE_WIDE", SignInButton.SIZE_WIDE);
         constants.put("SIGN_IN_CANCELLED", String.valueOf(GoogleSignInStatusCodes.SIGN_IN_CANCELLED));
         constants.put("SIGN_IN_REQUIRED", String.valueOf(CommonStatusCodes.SIGN_IN_REQUIRED));
+        constants.put("SCOPES_ALREADY_GRANTED", "NEVER_HAPPENS_ON_ANDROID");
         constants.put("IN_PROGRESS", ASYNC_OP_IN_PROGRESS);
         constants.put(PLAY_SERVICES_NOT_AVAILABLE, PLAY_SERVICES_NOT_AVAILABLE);
 
@@ -205,11 +206,7 @@ public class RNGoogleSigninModule extends NativeGoogleSigninSpec {
       }
       signInOrAddScopesPromiseWrapper.setPromiseWithInProgressCheck(promise, "addScopes");
 
-      ReadableArray scopes = config.getArray("scopes");
-      Scope[] scopeArr = new Scope[scopes.size()];
-      for (int i = 0; i < scopes.size(); i++) {
-        scopeArr[i] = new Scope(scopes.getString(i));
-      }
+      Scope[] scopeArr = createScopesArray(config.getArray("scopes"));
 
       GoogleSignIn.requestPermissions(
         activity, REQUEST_CODE_ADD_SCOPES, account, scopeArr);

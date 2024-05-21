@@ -62,3 +62,6 @@ lib/
 .yarn/*
 !.yarn/releases
 !.yarn/plugins
+
+
+docs/

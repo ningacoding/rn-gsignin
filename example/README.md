@@ -23,6 +23,11 @@ export default {
 
 ### Unlinking example app from a Google Account
 
+- log out in the app
 - unlink at https://myaccount.google.com/connections
 - delete the storage of the Google play services app
 - wait a bit
+
+### Enabling access to the People API
+
+Go to https://console.cloud.google.com/apis/api/people.googleapis.com/metrics?project=abcd-1234

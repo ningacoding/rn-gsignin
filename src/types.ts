@@ -4,7 +4,7 @@
 export type SignInParams = {
   /**
    * iOS only. The user's ID, or email address, to be prefilled in the authentication UI if possible.
-   * [See docs here](https://developers.google.com/identity/sign-in/ios/api/interface_g_i_d_sign_in.html#a0a68c7504c31ab0b728432565f6e33fd)
+   * [See docs here](https://developers.google.com/identity/sign-in/ios/reference/Classes/GIDSignIn#-signinwithpresentingviewcontroller:hint:completion:)
    */
   loginHint?: string;
 };
@@ -18,23 +18,25 @@ export type ConfigureParams = {
    */
   scopes?: string[];
   /**
-   * Web client ID from Developer Console. Required for offline access
+   * Web client ID from Developer Console. Required for offline access.
    */
   webClientId?: string;
 
   /**
-   * Must be true if you wish to access user APIs on behalf of the user from
-   * your own server
+   * Must be true if you wish to access user APIs on behalf of the user from your own server.
+   *
+   * When offline access is requested, an authorization code is returned so the server can use the authorization code to exchange for a refresh token.
+   * The refresh token allows the server to access Google data when the user is not actively using the app.
    */
   offlineAccess?: boolean;
 
   /**
-   * Specifies a hosted domain restriction
+   * Specifies a hosted domain restriction. By setting this, authorization will be restricted to accounts of the user in the specified domain.
    */
   hostedDomain?: string;
 
   /**
-   * ANDROID ONLY. If true, the granted server auth code can be exchanged for an access token and a refresh token.
+   * ANDROID ONLY. Only use `true` if your server has suffered some failure and lost the user's refresh token.
    */
   forceCodeForRefreshToken?: boolean;
 
@@ -50,12 +52,12 @@ export type ConfigureParams = {
    */
   openIdRealm?: string;
   /**
-   * iOS ONLY The desired height (and width) of the profile image. Defaults to 120px
+   * iOS ONLY: The desired height and width of the profile image. Defaults to 120px
    */
   profileImageSize?: number;
 } & ClientIdOrPlistPath;
 
-type ClientIdOrPlistPath =
+export type ClientIdOrPlistPath =
   | {
       /**
        * If you want to specify the client ID of type iOS
@@ -64,7 +66,7 @@ type ClientIdOrPlistPath =
     }
   | {
       /**
-       * If you want to specify a different bundle path name for the GoogleService-Info, e.g. GoogleService-Info-Staging
+       * iOS only: If you want to specify a different bundle path name for the GoogleService-Info, e.g. GoogleService-Info-Staging
        */
       googleServicePlistPath?: string;
     };

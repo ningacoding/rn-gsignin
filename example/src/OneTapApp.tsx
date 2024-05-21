@@ -25,7 +25,9 @@ import { configureGoogleSignIn, RenderError } from './components/components';
 import { OneTapUserInfo } from './components/OneTapUserInfo';
 
 const prettyJson = (value: any) => {
-  return JSON.stringify(value, null, 2);
+  const val = JSON.stringify(value, null, 2);
+  console.log(val);
+  return val;
 };
 
 export const OneTapApp = () => {
@@ -55,6 +57,7 @@ export const OneTapApp = () => {
         webClientId: config.webClientId,
         iosClientId: config.iosClientId,
       });
+      console.log({ userInfo });
 
       setUserInfo(userInfo);
       setErrorState(null);
@@ -108,6 +111,7 @@ export const OneTapApp = () => {
           break;
         }
         case statusCodes.SIGN_IN_CANCELLED:
+          console.log('sign in cancelled');
           // sign in was cancelled, don't do anything
           break;
         case statusCodes.IN_PROGRESS:
@@ -119,15 +123,18 @@ export const OneTapApp = () => {
           alert('failed to present one tap UI:' + error.toString());
           break;
         case statusCodes.PLAY_SERVICES_NOT_AVAILABLE:
-          // android only
+          // Android and Web only
           alert('play services not available or outdated');
           break;
         default:
-          alert('Something went wrong' + error.toString() + error.code);
+          alert(
+            `Something went wrong: ${error.message.toString()} ${error.code}`,
+          );
       }
       setErrorState(error);
     } else {
       alert(`an error that's not related to google sign in occurred: ${error}`);
+      setErrorState(null);
     }
   };
 
@@ -155,6 +162,7 @@ export const OneTapApp = () => {
           alert(error.toString());
         }}
       />
+
       <GoogleSigninButton
         color={GoogleSigninButton.Color.Dark}
         onPress={presentExplicitSignIn}
@@ -172,6 +180,81 @@ export const OneTapApp = () => {
     <SafeAreaView style={[styles.pageContainer]}>
       <ScrollView contentContainerStyle={styles.container}>
         {body}
+
+        <View style={{ gap: 10 }}>
+          <Button
+            onPress={async () => {
+              try {
+                const authResponse =
+                  await GoogleOneTapSignIn.requestAuthorization({
+                    scopes: [
+                      'https://www.googleapis.com/auth/user.gender.read',
+                    ],
+                    // scopes: ['profile', 'email'],
+                  });
+                console.log({ authResponse });
+
+                if (!authResponse) {
+                  console.log('no authResponse');
+                  return;
+                }
+                const tokenInfo = await getTokenInfo(authResponse?.accessToken);
+                prettyJson({ tokenInfo });
+                alert('response: ' + JSON.stringify(authResponse, null, 2));
+              } catch (err) {
+                handleError(err);
+              }
+            }}
+            title="request access to the gender scope"
+          />
+          <Button
+            onPress={async () => {
+              const authResponse =
+                await GoogleOneTapSignIn.requestAuthorization({
+                  scopes: ['profile', 'email'],
+                  offlineAccess: {
+                    webClientId: config.webClientId,
+                  },
+                });
+              console.log({ authResponse });
+
+              if (!authResponse) {
+                console.log('no authResponse');
+                return;
+              }
+              alert('response: ' + JSON.stringify(authResponse, null, 2));
+            }}
+            title="request server auth code"
+          />
+          <Button
+            onPress={async () => {
+              try {
+                const tokenResult =
+                  await GoogleOneTapSignIn.requestAuthorization({
+                    scopes: [
+                      // 'profile' - requesting this always presents the modal
+                      'https://www.googleapis.com/auth/userinfo.profile',
+                      'https://www.googleapis.com/auth/user.gender.read',
+                    ],
+                  });
+                if (!tokenResult) {
+                  throw new Error('called requestAuthorization before sign in');
+                }
+                const { accessToken } = tokenResult;
+                prettyJson({ accessToken });
+                const tokenInfo = await getTokenInfo(accessToken);
+                prettyJson({ tokenInfo });
+                const userInfo = await fetchGender(accessToken);
+
+                prettyJson({ userInfo });
+                alert('userInfo ' + JSON.stringify(userInfo, null, 2));
+              } catch (err) {
+                handleError(err);
+              }
+            }}
+            title="fetch user name and gender"
+          />
+        </View>
 
         {Platform.OS !== 'web' && (
           <View
@@ -217,11 +300,39 @@ export const OneTapApp = () => {
   );
 };
 
+const fetchGender = (accessToken: string) => {
+  const authorization = `Bearer ${accessToken}`;
+
+  const res = fetch(
+    `https://content-people.googleapis.com/v1/people/me?personFields=genders%2Cnames`,
+    {
+      headers: {
+        'accept': '*/*',
+        'accept-language': 'en;q=0.9,en-US;q=0.8',
+        'authorization': authorization,
+        'cache-control': 'no-cache',
+        'pragma': 'no-cache',
+      },
+      body: null,
+      method: 'GET',
+      credentials: 'include',
+    },
+  );
+  return res.then((res) => res.json());
+};
+
+const getTokenInfo = (accessToken: string) => {
+  return fetch(
+    `https://www.googleapis.com/oauth2/v1/tokeninfo?access_token=${accessToken}`,
+  ).then((res) => res.json());
+};
+
 const styles = StyleSheet.create({
   container: {
     alignItems: 'center',
     justifyContent: 'center',
     flexGrow: 1,
+    gap: 10,
   },
 
   pageContainer: { flex: 1, backgroundColor: '#F5FCFF' },
