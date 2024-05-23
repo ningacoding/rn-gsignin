@@ -144,5 +144,6 @@
     "jwt-decode": "^4.0.0",
     "nanoevents": "^9.0.0"
   },
-  "packageManager": "yarn@4.1.1"
+  "packageManager": "yarn@4.1.1",
+  "GoogleSignInPodVersion": "~> 7.1"
 }
