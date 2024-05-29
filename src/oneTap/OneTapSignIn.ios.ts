@@ -1,10 +1,10 @@
 import type { OneTapSignInModule, OneTapUser } from './types';
 import { GoogleSignin } from '../signIn/GoogleSignin';
-import { isErrorWithCode } from '@react-native-google-signin/google-signin';
 import {
   ios_only_SCOPES_ALREADY_GRANTED,
   statusCodes,
 } from '../errors/errorCodes';
+import { isErrorWithCode } from '../types';
 
 function throwNoIdToken(callSite: string): never {
   // this prob never happens

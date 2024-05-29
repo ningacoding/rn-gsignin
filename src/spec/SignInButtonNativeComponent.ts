@@ -14,6 +14,7 @@ interface NativeProps extends ViewProps {
   size: Int32;
 }
 
-export default codegenNativeComponent<NativeProps>(
-  'RNGoogleSigninButton',
-) as HostComponent<NativeProps>;
+export default codegenNativeComponent<NativeProps>('RNGoogleSigninButton', {
+  // @ts-expect-error we would like to not generate anything on macos but this doesn't work. Maybe it will later
+  excludedPlatforms: ['macos'],
+}) as HostComponent<NativeProps>;

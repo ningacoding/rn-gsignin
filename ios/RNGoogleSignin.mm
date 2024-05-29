@@ -20,8 +20,6 @@ static NSString *const ASYNC_OP_IN_PROGRESS = @"ASYNC_OP_IN_PROGRESS";
 static NSString *const NO_SAVED_CREDENTIAL_FOUND = @"NO_SAVED_CREDENTIAL_FOUND";
 static NSString *const ONE_TAP_START_FAILED = @"ONE_TAP_START_FAILED";
 
-
-
 // The key in `GoogleService-Info.plist` client id.
 // For more see https://developers.google.com/identity/sign-in/ios/start
 static NSString *const kClientIdKey = @"CLIENT_ID";
@@ -29,9 +27,15 @@ static NSString *const kClientIdKey = @"CLIENT_ID";
 - (NSDictionary *)constantsToExport
 {
   return @{
+#if !TARGET_OS_OSX
            @"BUTTON_SIZE_ICON": @(kGIDSignInButtonStyleIconOnly),
            @"BUTTON_SIZE_STANDARD": @(kGIDSignInButtonStyleStandard),
            @"BUTTON_SIZE_WIDE": @(kGIDSignInButtonStyleWide),
+#else
+           @"BUTTON_SIZE_STANDARD": @(0),
+           @"BUTTON_SIZE_WIDE": @(1),
+           @"BUTTON_SIZE_ICON": @(2),
+#endif
            @"SIGN_IN_CANCELLED": [@(kGIDSignInErrorCodeCanceled) stringValue],
            @"SIGN_IN_REQUIRED": [@(kGIDSignInErrorCodeHasNoAuthInKeychain) stringValue],
            @"SCOPES_ALREADY_GRANTED": [@(kGIDSignInErrorCodeScopesAlreadyGranted) stringValue],
@@ -46,9 +50,16 @@ static NSString *const kClientIdKey = @"CLIENT_ID";
 #ifdef RCT_NEW_ARCH_ENABLED
 - (facebook::react::ModuleConstants<JS::NativeGoogleSignin::Constants>)getConstants {
   return facebook::react::typedConstants<JS::NativeGoogleSignin::Constants>(
-          {.BUTTON_SIZE_ICON = kGIDSignInButtonStyleIconOnly,
+          {
+#if TARGET_OS_OSX
+                  .BUTTON_SIZE_STANDARD = 0,
+                  .BUTTON_SIZE_WIDE = 1,
+                  .BUTTON_SIZE_ICON = 2,
+#else
+                  .BUTTON_SIZE_ICON = kGIDSignInButtonStyleIconOnly,
                   .BUTTON_SIZE_STANDARD = kGIDSignInButtonStyleStandard,
                   .BUTTON_SIZE_WIDE = kGIDSignInButtonStyleWide,
+#endif
                   .SIGN_IN_CANCELLED = [@(kGIDSignInErrorCodeCanceled) stringValue],
                   .SIGN_IN_REQUIRED = [@(kGIDSignInErrorCodeHasNoAuthInKeychain) stringValue],
                   .IN_PROGRESS = ASYNC_OP_IN_PROGRESS,
@@ -124,13 +135,18 @@ RCT_EXPORT_METHOD(signIn:(NSDictionary *)options
                   reject:(RCTPromiseRejectBlock)reject)
 {
   dispatch_async(dispatch_get_main_queue(), ^{
-      UIViewController* presentingViewController = RCTPresentedViewController();
       NSString* hint = options[@"loginHint"];
       NSArray* scopes = self.scopes;
 
-      [GIDSignIn.sharedInstance signInWithPresentingViewController:presentingViewController hint:hint additionalScopes:scopes completion:^(GIDSignInResult * _Nullable signInResult, NSError * _Nullable error) {
+#if !TARGET_OS_OSX
+      [GIDSignIn.sharedInstance signInWithPresentingViewController:RCTPresentedViewController() hint:hint additionalScopes:scopes completion:^(GIDSignInResult * _Nullable signInResult, NSError * _Nullable error) {
           [self handleCompletion:signInResult withError:error withResolver:resolve withRejector:reject fromCallsite:@"signIn"];
       }];
+#else
+    [GIDSignIn.sharedInstance signInWithPresentingWindow:NSApplication.sharedApplication.mainWindow hint:hint additionalScopes:scopes completion:^(GIDSignInResult * _Nullable signInResult, NSError * _Nullable error) {
+        [self handleCompletion:signInResult withError:error withResolver:resolve withRejector:reject fromCallsite:@"signIn"];
+    }];
+#endif
   });
 }
 
@@ -145,11 +161,16 @@ RCT_EXPORT_METHOD(addScopes:(NSDictionary *)options
         return;
       }
       NSArray* scopes = options[@"scopes"];
-      UIViewController* presentingViewController = RCTPresentedViewController();
 
-      [currentUser addScopes:scopes presentingViewController:presentingViewController completion:^(GIDSignInResult * _Nullable signInResult, NSError * _Nullable error) {
+#if !TARGET_OS_OSX
+      [currentUser addScopes:scopes presentingViewController:RCTPresentedViewController() completion:^(GIDSignInResult * _Nullable signInResult, NSError * _Nullable error) {
           [self handleCompletion:signInResult withError:error withResolver:resolve withRejector:reject fromCallsite:@"addScopes"];
       }];
+#else
+    [currentUser addScopes:scopes presentingWindow:NSApplication.sharedApplication.mainWindow completion:^(GIDSignInResult * _Nullable signInResult, NSError * _Nullable error) {
+        [self handleCompletion:signInResult withError:error withResolver:resolve withRejector:reject fromCallsite:@"addScopes"];
+    }];
+#endif
   });
 }
 

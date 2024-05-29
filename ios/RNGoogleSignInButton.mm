@@ -17,10 +17,16 @@ using namespace facebook::react;
 #endif // RCT_NEW_ARCH_ENABLED
 @end
 
+
+// codegen generates some signatures for the button
+// and when the implementation doesn't exist, build fails
 @implementation RNGoogleSignInButton {
+#if !TARGET_OS_OSX
   GIDSignInButton *_button;
+#endif
 }
 
+#if !TARGET_OS_OSX
 #ifdef RCT_NEW_ARCH_ENABLED
 + (ComponentDescriptorProvider)componentDescriptorProvider
 {
@@ -64,6 +70,7 @@ using namespace facebook::react;
   [super updateProps:props oldProps:oldProps];
 }
 #endif
+#endif // !TARGET_OS_OSX
 
 @end
 

@@ -1,23 +1,13 @@
 import React, { useCallback } from 'react';
 
-import { StyleSheet, useColorScheme, ViewProps } from 'react-native';
-import RNGoogleSigninButton from '../spec/SignInButtonNativeComponent';
+import { StyleSheet, useColorScheme } from 'react-native';
 import { NativeModule } from '../spec/NativeGoogleSignin';
-import { Color } from './statics';
+import { Color, GoogleSigninButtonProps } from './statics';
 import { GoogleSigninButton as BaseGoogleSigninButton } from './GoogleSigninButton.web';
+import { BaseButton } from './BaseButton';
 
 const { BUTTON_SIZE_WIDE, BUTTON_SIZE_ICON, BUTTON_SIZE_STANDARD } =
   NativeModule.getConstants();
-
-/**
- * @group React Components
- * */
-export type GoogleSigninButtonProps = ViewProps & {
-  size?: number;
-  color?: 'dark' | 'light';
-  disabled?: boolean;
-  onPress?: () => void;
-};
 
 /**
  * @group React Components
@@ -41,7 +31,7 @@ export const GoogleSigninButton = ({
   }, [onPress]);
 
   return (
-    <RNGoogleSigninButton
+    <BaseButton
       {...rest}
       size={size}
       onPress={stripOnPressParams}

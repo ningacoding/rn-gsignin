@@ -69,7 +69,6 @@ export class GoogleSigninSampleApp extends Component<{}, State> {
     ) : (
       <GoogleSigninButton
         size={GoogleSigninButton.Size.Standard}
-        color={GoogleSigninButton.Color.Light}
         onPress={this._signIn}
         accessibilityLabel={'sign in'}
       />
@@ -200,7 +199,7 @@ export class GoogleSigninSampleApp extends Component<{}, State> {
 
   _signOut = async () => {
     try {
-      await GoogleSignin.revokeAccess();
+      // await GoogleSignin.revokeAccess();
       await GoogleSignin.signOut();
 
       this.setState({ userInfo: undefined, error: undefined });

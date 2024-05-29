@@ -10,11 +10,12 @@ Pod::Spec.new do |s|
   s.license      = package["license"]
   s.authors      = package["author"]
 
-  s.platforms    = { :ios => "10.0" }
+  s.platforms    = { :ios => "10.0", :osx => "10.13", :visionos => "1.0" }
   # source should not really matter in RN but it's required
   s.source       = { :git => "https://github.com/react-native-google-signin/google-signin-next.git", :tag => "#{s.version}" }
 
   s.source_files = "ios/**/*.{h,m,mm}"
+  s.osx.exclude_files = "ios/ios-only/**/*.{h,m,mm}"
 
   s.dependency "GoogleSignIn", package["GoogleSignInPodVersion"]
 
