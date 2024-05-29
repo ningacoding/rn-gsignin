@@ -24,6 +24,7 @@ jobs:
       - run: yarn typescript
       - run: yarn prettier:check
       - run: yarn lint
+      - run: yarn build
 
   publish-npm:
     needs: build
@@ -32,7 +33,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
         with:
-          fetch-depth: 0
+          fetch-depth: 0 # fetch all history for all branches and tags
       - uses: actions/setup-node@v3
         with:
           node-version: lts/*

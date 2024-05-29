@@ -7,7 +7,7 @@ import type {
 } from 'react-native/Libraries/Types/CodegenTypes';
 
 interface EventParams {}
-interface NativeProps extends ViewProps {
+export interface NativeProps extends ViewProps {
   onPress?: BubblingEventHandler<EventParams>;
   disabled?: WithDefault<boolean, false>;
   color?: WithDefault<'dark' | 'light', 'light'>;
