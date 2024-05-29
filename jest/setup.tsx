@@ -1,14 +1,15 @@
 import React from 'react';
 import { Pressable, Text } from 'react-native';
-import {
+import type {
   GoogleSigninButton,
   GoogleSigninButtonProps,
   WebGoogleSignInButtonProps,
   User,
   AuthorizationResponse,
   RequestAuthorizationParams,
+  OneTapUser,
+  statusCodes,
 } from '../src';
-import type { OneTapUser, statusCodes } from '../src';
 import type {
   OneTapSignInModule,
   WebOneTapSignInModule,
