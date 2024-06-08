@@ -1,62 +1,122 @@
-import { OneTapNativeModule } from '../spec/NativeOneTapSignIn';
-import { OneTapSignInModule, OneTapUser } from './types';
+import type { OneTapSignInModule, OneTapUser } from './types';
+import { GoogleSignin } from '../signIn/GoogleSignin';
+import {
+  ios_only_SCOPES_ALREADY_GRANTED,
+  statusCodes,
+} from '../errors/errorCodes';
+import { isErrorWithCode } from '../types';
+import { validateWebClientId } from './validateWebClientId';
+import { warnBadApiUsage } from './warnBadApiUsage';
 
-const signIn: OneTapSignInModule['signIn'] = (params): Promise<OneTapUser> => {
-  return OneTapNativeModule.signIn({
-    autoSignIn: true,
-    filterByAuthorizedAccounts: true,
-    ...params,
-  });
-};
+function throwNoIdToken(callSite: string): never {
+  // this should never happen on iOS
+  const e = new Error(`No idToken present in the ${callSite} response`);
+  // the docs say that the errors produced by the module should have a code property
+  Object.assign(e, { code: 'ID_TOKEN_EXPECTED' });
+  throw e;
+}
 
-const presentExplicitSignIn: OneTapSignInModule['presentExplicitSignIn'] = (
+const signInSilently: OneTapSignInModule['signIn'] = async (
   params,
-): Promise<OneTapUser> => {
-  return OneTapNativeModule.explicitSignIn(params);
+  callbacks,
+) => {
+  warnBadApiUsage(callbacks);
+
+  GoogleSignin.configure(params);
+  try {
+    const { user, idToken, serverAuthCode } =
+      await GoogleSignin.signInSilently();
+    if (!idToken) {
+      throwNoIdToken('signInSilently');
+    }
+    const oneTapUser: OneTapUser = {
+      user,
+      idToken,
+      serverAuthCode,
+      // credentialOrigin is not available on the iOS side and is added for compatibility with Web
+      credentialOrigin: 'user',
+    };
+    return oneTapUser;
+  } catch (e) {
+    if (isErrorWithCode(e) && e.code === statusCodes.SIGN_IN_REQUIRED) {
+      // the message is an approximation of what Android would return
+      const err = new Error('Cannot find a matching credential.');
+      Object.assign(err, {
+        code: statusCodes.NO_SAVED_CREDENTIAL_FOUND,
+      });
+      throw err;
+    } else {
+      throw e;
+    }
+  }
 };
 
-const createAccount: OneTapSignInModule['createAccount'] = (
+const createAccount: OneTapSignInModule['signIn'] = async (
   params,
-): Promise<OneTapUser> => {
-  return OneTapNativeModule.signIn({
-    autoSignIn: false,
-    filterByAuthorizedAccounts: false,
-    ...params,
+  callbacks,
+) => {
+  warnBadApiUsage(callbacks);
+  GoogleSignin.configure(params);
+  const { user, idToken, serverAuthCode } = await GoogleSignin.signIn({
+    // TODO
+    // loginHint: params?.loginHint,
   });
-};
-
-const signOut: OneTapSignInModule['signOut'] = () => {
-  // make sure no params are passed to the native module
-  // because native module doesn't expect any
-  return OneTapNativeModule.signOut();
+  if (!idToken) {
+    throwNoIdToken('signIn / createAccount');
+  }
+  const oneTapUser: OneTapUser = {
+    user,
+    idToken,
+    serverAuthCode,
+    // credentialOrigin is not available on the iOS side and is added for compatibility with Web
+    credentialOrigin: 'user',
+  };
+  return oneTapUser;
 };
 
 const requestAuthorization: OneTapSignInModule['requestAuthorization'] = async (
-  params,
+  objectWithScopes,
 ) => {
-  // android might only return the scopes that we asked for, not those that were already granted
-  const authResultPromise = OneTapNativeModule.requestAuthorization({
-    scopes: params.scopes,
-    hostedDomain: params?.hostedDomain,
-    webClientId: params?.offlineAccess?.webClientId,
-    forceCodeForRefreshToken:
-      params?.offlineAccess?.forceCodeForRefreshToken === true,
-    accountName: params?.accountName,
-  });
-  const authResult = await authResultPromise;
-  return authResult;
+  objectWithScopes?.offlineAccess &&
+    validateWebClientId(objectWithScopes.offlineAccess);
+  // we return null on iOS because to launch the sign in, we'd need all the params of configure() here as well
+  // maybe a separate configure method should exist?
+
+  // on ios, this only serves to add scopes. If you need offline access,
+  // you would get serverAuthCode by calling createAccount() with offlineAccess: true
+  const serverAuthCode = null;
+  try {
+    const user = await GoogleSignin.addScopes(objectWithScopes);
+    if (!user) {
+      return null;
+    }
+    const { accessToken } = await GoogleSignin.getTokens();
+    return { grantedScopes: user.scopes, accessToken, serverAuthCode };
+  } catch (err) {
+    if (isErrorWithCode(err) && err.code === ios_only_SCOPES_ALREADY_GRANTED) {
+      // return the scopes that are already granted
+      const user = GoogleSignin.getCurrentUser();
+      if (!user) {
+        return null;
+      }
+      const { accessToken } = await GoogleSignin.getTokens();
+      return { grantedScopes: user.scopes, accessToken, serverAuthCode };
+    }
+    throw err;
+  }
 };
 
 /**
- * The entry point of the One-tap Sign In API, exposed as `GoogleOneTapSignIn`. On Android, this module uses the [Android Credential Manager](https://developers.google.com/identity/android-credential-manager) under the hood.
+ * The entry point of the One-tap Sign In API, exposed as `GoogleOneTapSignIn`.
  *
- * On the web, don't call `signIn` / `createAccount` and use the `WebGoogleOneTapSignIn.signIn` instead. The `signOut` method is available on all platforms.
+ * On the Web, the signatures of `signIn`, `presentExplicitSignIn`, and `createAccount` are callback-based. Read more in the guide.
+ *
  * @group One-tap sign in module
  * */
-export const GoogleOneTapSignIn = {
-  signIn,
+export const GoogleOneTapSignIn: OneTapSignInModule = {
+  signIn: signInSilently,
   createAccount,
-  signOut,
-  presentExplicitSignIn,
+  presentExplicitSignIn: createAccount,
+  signOut: GoogleSignin.signOut,
   requestAuthorization,
-} satisfies OneTapSignInModule;
+};

@@ -1,6 +1,5 @@
 package com.reactnativegooglesignin
 
-import android.accounts.Account
 import android.app.Activity
 import android.app.PendingIntent
 import android.content.Intent
@@ -21,15 +20,11 @@ import com.facebook.react.bridge.Promise
 import com.facebook.react.bridge.ReactApplicationContext
 import com.facebook.react.bridge.ReadableMap
 import com.facebook.react.bridge.WritableMap
-import com.google.android.gms.auth.api.identity.AuthorizationRequest
 import com.google.android.gms.auth.api.identity.AuthorizationResult
 import com.google.android.gms.auth.api.identity.Identity
 import com.google.android.gms.auth.api.signin.GoogleSignInStatusCodes
-import com.google.android.libraries.identity.googleid.GetGoogleIdOption
-import com.google.android.libraries.identity.googleid.GetSignInWithGoogleOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import com.google.android.libraries.identity.googleid.GoogleIdTokenParsingException
-import com.reactnativegooglesignin.Utils.createScopesArray
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -40,6 +35,7 @@ class RNOneTapSignInModule(reactContext: ReactApplicationContext) :
   private val credentialManager: CredentialManager =
     CredentialManager.create(reactApplicationContext)
   private val addScopesPromiseWrapper = PromiseWrapper(NAME)
+  private val oneTapUtils = OneTapUtils.OneTapUtils(reactApplicationContext)
 
   private val activityEventListener =
     object : BaseActivityEventListener() {
@@ -88,12 +84,12 @@ class RNOneTapSignInModule(reactContext: ReactApplicationContext) :
   }
 
   override fun explicitSignIn(params: ReadableMap, promise: Promise) {
-    val explicitRequest = buildExplicitOneTapSignInRequest(params)
+    val explicitRequest = oneTapUtils.buildExplicitOneTapSignInRequest(params)
     signInInternal(explicitRequest, promise)
   }
 
   override fun signIn(params: ReadableMap, promise: Promise) {
-    val googleIdOption = buildOneTapSignInRequest(params)
+    val googleIdOption = oneTapUtils.buildOneTapSignInRequest(params)
     signInInternal(googleIdOption, promise)
   }
 
@@ -153,7 +149,7 @@ class RNOneTapSignInModule(reactContext: ReactApplicationContext) :
           try {
             val googleIdTokenCredential = GoogleIdTokenCredential
               .createFrom(credential.data)
-            val userParams = Utils.getUserProperties(googleIdTokenCredential)
+            val userParams = oneTapUtils.getUserProperties(googleIdTokenCredential)
             promise.resolve(userParams)
           } catch (e: GoogleIdTokenParsingException) {
             promise.reject(NAME, e)
@@ -177,7 +173,7 @@ class RNOneTapSignInModule(reactContext: ReactApplicationContext) :
     }
     // com.google.android.gms.common.Scopes can be used to get predefined scopes
 
-    val authorizationRequest = buildAuthorizationRequest(params)
+    val authorizationRequest = oneTapUtils.buildAuthorizationRequest(params)
 
     Identity.getAuthorizationClient(activity)
       .authorize(authorizationRequest)
@@ -232,51 +228,5 @@ class RNOneTapSignInModule(reactContext: ReactApplicationContext) :
     const val ONE_TAP_START_FAILED = "ONE_TAP_START_FAILED"
     const val NO_SAVED_CREDENTIAL_FOUND = "NO_SAVED_CREDENTIAL_FOUND"
     const val REQUEST_AUTHORIZE = 9002
-  }
-
-  private fun buildOneTapSignInRequest(
-    params: ReadableMap
-  ): GetGoogleIdOption {
-    val webClientId = params.getString("webClientId")!!
-    val nonce = params.getString("nonce")
-    val autoSignIn = params.getBoolean("autoSignIn")
-    val filterByAuthorizedAccounts = params.getBoolean("filterByAuthorizedAccounts")
-    return GetGoogleIdOption.Builder()
-      .setFilterByAuthorizedAccounts(filterByAuthorizedAccounts)
-      .setServerClientId(webClientId)
-      .setNonce(nonce)
-      .setAutoSelectEnabled(autoSignIn)
-      .build()
-  }
-
-  private fun buildExplicitOneTapSignInRequest(
-    params: ReadableMap
-  ): GetSignInWithGoogleOption {
-    val webClientId = params.getString("webClientId")!!
-    val nonce = params.getString("nonce")
-    return GetSignInWithGoogleOption.Builder(webClientId)
-      .setNonce(nonce)
-      .build()
-  }
-
-  private fun buildAuthorizationRequest(params: ReadableMap): AuthorizationRequest {
-    val serverClientId = if (params.hasKey("webClientId")) params.getString("webClientId") else null
-    val hostedDomain = if (params.hasKey("hostedDomain")) params.getString("hostedDomain") else null
-    val accountName = if (params.hasKey("accountName")) params.getString("accountName") else null
-
-    return AuthorizationRequest.builder().apply {
-      setRequestedScopes(createScopesArray(params.getArray("scopes")).asList())
-      serverClientId?.let {
-        requestOfflineAccess(
-          it,
-          params.getBoolean("forceCodeForRefreshToken")
-        )
-      }
-      hostedDomain?.let { filterByHostedDomain(it) }
-      accountName?.let {
-        val account = Account(it, "com.google")
-        setAccount(account)
-      }
-    }.build()
   }
 }

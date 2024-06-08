@@ -9,25 +9,32 @@ import {
 type ReducedWebOptions = Omit<
   IdConfiguration,
   'client_id' | 'nonce' | 'auto_select' | 'callback'
->;
+> & {
+  skipPrompt?: boolean;
+};
 
 type IosConfigurationParams = Pick<
   ConfigureParams,
-  'scopes' | 'profileImageSize' | 'openIdRealm' | 'offlineAccess'
+  | 'scopes'
+  | 'profileImageSize'
+  | 'openIdRealm'
+  | 'offlineAccess'
+  | 'hostedDomain'
 > &
   ClientIdOrPlistPath;
+
+// webClientId is not optional on the web, which is why it's required in the apis
+export type ClientId = 'autoDetect' | (string & {});
 
 /**
  * @group One-tap sign in module
  * */
 export type OneTapSignInParams = {
-  webClientId: string;
-  iosClientId?: string;
+  /**
+   * The web client ID obtained from Google Cloud console. Pass `autoDetect` to automatically determine the value from Firebase config file.
+   */
+  webClientId: ClientId;
   nonce?: string;
-
-  // TODO the below should probably not be in public api, but provided in signIn / createAccount
-  autoSignIn?: boolean;
-  filterByAuthorizedAccounts?: boolean;
 } & IosConfigurationParams &
   ReducedWebOptions;
 
@@ -76,9 +83,9 @@ export type RequestAuthorizationParams = {
    * */
   offlineAccess?: {
     /**
-     * Web client ID from Developer Console.
+     * Web client ID from Developer Console. Pass `autoDetect` to automatically determine the value from Firebase config file.
      */
-    webClientId: string;
+    webClientId: ClientId;
     /**
      * If true, the granted code can be exchanged for an access token and a refresh token. Only use true if your server has suffered some failure and lost the user's refresh token.
      * */
@@ -86,7 +93,7 @@ export type RequestAuthorizationParams = {
   };
 };
 
-// TODO - this or callback-based api, or both?
+// TODO
 // type SignInResponse =
 //   | {
 //       result: 'success';
@@ -118,12 +125,15 @@ export type AuthorizationResponse = null | {
   serverAuthCode: string | null;
 };
 
+export interface SignInInterface {
+  (params: OneTapSignInParams, callbacks: WebOneTapSignInCallbacks): void;
+  (params: OneTapSignInParams, callbacks?: never): Promise<OneTapUser>;
+}
 // this is the public interface of the module
 export type OneTapSignInModule = {
-  signIn: (params: OneTapSignInParams) => Promise<OneTapUser>;
-  // TODO reduce OneTapSignInParams to only the necessary fields in presentExplicitSignIn
-  presentExplicitSignIn: (params: OneTapSignInParams) => Promise<OneTapUser>;
-  createAccount: (params: OneTapSignInParams) => Promise<OneTapUser>;
+  signIn: SignInInterface;
+  presentExplicitSignIn: SignInInterface;
+  createAccount: SignInInterface;
   requestAuthorization: (
     options: RequestAuthorizationParams,
   ) => Promise<AuthorizationResponse>;

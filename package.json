@@ -135,9 +135,6 @@
       ]
     ]
   },
-  "resolutions": {
-    "@react-native/metro-config": "0.74.76"
-  },
   "codegenConfig": {
     "name": "RNGoogleSignInCGen",
     "type": "all",

@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   StyleSheet,
   Button,
@@ -7,6 +7,7 @@ import {
   Platform,
   Text,
   View,
+  Switch,
 } from 'react-native';
 import {
   GoogleOneTapSignIn,
@@ -17,7 +18,6 @@ import {
   WebGoogleSigninButton,
   GoogleSigninButton,
   isErrorWithCode,
-  WebGoogleOneTapSignIn,
 } from '@react-native-google-signin/google-signin';
 // @ts-ignore see docs/CONTRIBUTING.md for details
 import config from './config/config';
@@ -34,12 +34,14 @@ export const OneTapApp = () => {
   const [userInfoState, setUserInfo] = useState<OneTapUser | null>(null);
   const [errorState, setErrorState] = useState<NativeModuleError | null>(null);
 
-  const presentExplicitSignIn = useCallback(async () => {
+  const [autoDetectWebClientId, setAutoDetectWebClientId] = useState(false);
+  const webClientId = autoDetectWebClientId ? 'autoDetect' : config.webClientId;
+
+  const presentExplicitSignIn = async () => {
     try {
       await GoogleSignin.hasPlayServices();
       const userInfo = await GoogleOneTapSignIn.presentExplicitSignIn({
-        webClientId: config.webClientId,
-        iosClientId: config.iosClientId,
+        webClientId,
       });
 
       setUserInfo(userInfo);
@@ -49,13 +51,15 @@ export const OneTapApp = () => {
         handleError(error);
       }, 500);
     }
-  }, []);
-  const presentOneTapSignIn = useCallback(async () => {
+  };
+
+  const presentOneTapSignIn = async () => {
     try {
       await GoogleSignin.hasPlayServices();
       const userInfo = await GoogleOneTapSignIn.signIn({
-        webClientId: config.webClientId,
+        webClientId,
         iosClientId: config.iosClientId,
+        offlineAccess: true,
       });
       console.log({ userInfo });
 
@@ -66,13 +70,14 @@ export const OneTapApp = () => {
         handleError(error);
       }, 500);
     }
-  }, []);
+  };
 
   useEffect(() => {
     if (Platform.OS === 'web') {
-      WebGoogleOneTapSignIn.signIn(
+      GoogleOneTapSignIn.signIn(
         {
-          webClientId: config.webClientId,
+          webClientId: webClientId,
+          ux_mode: 'popup',
         },
         {
           onError: (error) => {
@@ -88,13 +93,12 @@ export const OneTapApp = () => {
         },
       );
     }
-  }, []);
+  }, [webClientId]);
 
   const _createAccount = async () => {
     try {
       const user = await GoogleOneTapSignIn.createAccount({
-        webClientId: config.webClientId,
-        iosClientId: config.iosClientId,
+        webClientId,
       });
       setUserInfo(user);
       setErrorState(null);
@@ -156,7 +160,14 @@ export const OneTapApp = () => {
       <OneTapUserInfo userInfo={userInfoState} signOut={_signOut} />
     </>
   ) : (
-    <View style={{ gap: 10 }}>
+    <View style={{ gap: 10, alignItems: 'center' }}>
+      <View style={{ flexDirection: 'row', gap: 10, alignItems: 'center' }}>
+        <Text>Automatic webClientId detection (native only)</Text>
+        <Switch
+          value={autoDetectWebClientId}
+          onValueChange={setAutoDetectWebClientId}
+        />
+      </View>
       <WebGoogleSigninButton
         onError={(error) => {
           alert(error.toString());
@@ -213,7 +224,7 @@ export const OneTapApp = () => {
                 await GoogleOneTapSignIn.requestAuthorization({
                   scopes: ['profile', 'email'],
                   offlineAccess: {
-                    webClientId: config.webClientId,
+                    webClientId,
                   },
                 });
               console.log({ authResponse });
@@ -238,7 +249,9 @@ export const OneTapApp = () => {
                     ],
                   });
                 if (!tokenResult) {
-                  throw new Error('called requestAuthorization before sign in');
+                  throw new Error(
+                    'called requestAuthorization() before signing in',
+                  );
                 }
                 const { accessToken } = tokenResult;
                 prettyJson({ accessToken });

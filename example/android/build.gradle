@@ -19,6 +19,8 @@ buildscript {
         getReactNativeDependencies().each { dependency ->
             classpath(dependency)
         }
+        // for firebase
+        // classpath 'com.google.gms:google-services:4.4.1'
     }
 }
 

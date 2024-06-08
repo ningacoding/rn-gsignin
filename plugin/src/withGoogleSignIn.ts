@@ -26,7 +26,7 @@ function validateOptions(options: Options) {
   }
   if (!options.iosUrlScheme.startsWith('com.googleusercontent.apps.')) {
     throw new Error(
-      `messagePrefix: \`iosUrlScheme\` must start with "com.googleusercontent.apps": ${JSON.stringify(
+      `${messagePrefix}: \`iosUrlScheme\` must start with "com.googleusercontent.apps": ${JSON.stringify(
         options,
       )}`,
     );

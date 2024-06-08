@@ -10,7 +10,11 @@ export interface Spec extends TurboModule {
     filterByAuthorizedAccounts: boolean;
   }): Promise<OneTapUser>;
   signOut(): Promise<null>;
-  explicitSignIn(_params: Object): Promise<OneTapUser>;
+  explicitSignIn(params: {
+    nonce?: string;
+    hostedDomain?: string;
+    webClientId: string;
+  }): Promise<OneTapUser>;
   requestAuthorization(params: {
     scopes: string[];
     accountName?: string;

@@ -4,7 +4,6 @@ import android.net.Uri;
 
 import androidx.annotation.NonNull;
 
-import com.auth0.android.jwt.JWT;
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.bridge.WritableArray;
@@ -16,7 +15,6 @@ import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.common.api.CommonStatusCodes;
 import com.google.android.gms.common.api.Scope;
 import com.google.android.gms.tasks.Task;
-import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential;
 
 public class Utils {
 
@@ -27,7 +25,6 @@ public class Utils {
         }
         return sb.toString().trim();
     }
-
 
     static WritableMap getUserProperties(@NonNull GoogleSignInAccount acct) {
         Uri photoUrl = acct.getPhotoUrl();
@@ -52,38 +49,6 @@ public class Utils {
         }
         params.putArray("scopes", scopes);
         return params;
-    }
-
-    static WritableMap getUserProperties(@NonNull GoogleIdTokenCredential acct) {
-        Uri photoUrl = acct.getProfilePictureUri();
-        String idToken = acct.getIdToken();
-        String email = acct.getId();
-
-        WritableMap user = Arguments.createMap();
-        user.putString("id", getSubjectId(acct));
-        user.putString("email", email);
-        user.putString("name", acct.getDisplayName());
-        user.putString("givenName", acct.getGivenName());
-        user.putString("familyName", acct.getFamilyName());
-        user.putString("photo", photoUrl != null ? photoUrl.toString() : null);
-
-        WritableMap params = Arguments.createMap();
-        params.putMap("user", user);
-        params.putString("idToken", idToken);
-        // credentialOrigin is not available on the Android side and is added for compatibility with web
-        params.putString("credentialOrigin", "user");
-
-        return params;
-    }
-
-    static String getSubjectId(@NonNull GoogleIdTokenCredential acct) {
-        try {
-          String token = acct.getIdToken();
-          JWT jwt = new JWT(token);
-          return jwt.getSubject();
-        } catch (Exception e) {
-          return acct.getId();
-        }
     }
 
     static GoogleSignInOptions getSignInOptions(

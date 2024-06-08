@@ -8,14 +8,12 @@ import type {
   User,
 } from '../types';
 import { NativeModule } from '../spec/NativeGoogleSignin';
+import { validateWebClientId } from '../oneTap/validateWebClientId';
 
 let configPromise = Promise.resolve();
 
-function configure(options: ConfigureParams = {}): void {
-  if (options.offlineAccess && !options.webClientId) {
-    throw new Error('RNGoogleSignin: offline use requires server web ClientID');
-  }
-
+function configure(options: ConfigureParams): void {
+  validateWebClientId(options);
   configPromise = NativeModule.configure(options);
 }
 

@@ -24,6 +24,11 @@ static NSString *const ONE_TAP_START_FAILED = @"ONE_TAP_START_FAILED";
 // For more see https://developers.google.com/identity/sign-in/ios/start
 static NSString *const kClientIdKey = @"CLIENT_ID";
 
+typedef struct {
+    NSString *clientId;
+    NSString *webClientId;
+} ClientConfiguration;
+
 - (NSDictionary *)constantsToExport
 {
   return @{
@@ -51,14 +56,14 @@ static NSString *const kClientIdKey = @"CLIENT_ID";
 - (facebook::react::ModuleConstants<JS::NativeGoogleSignin::Constants>)getConstants {
   return facebook::react::typedConstants<JS::NativeGoogleSignin::Constants>(
           {
-#if TARGET_OS_OSX
-                  .BUTTON_SIZE_STANDARD = 0,
-                  .BUTTON_SIZE_WIDE = 1,
-                  .BUTTON_SIZE_ICON = 2,
-#else
+#if !TARGET_OS_OSX
                   .BUTTON_SIZE_ICON = kGIDSignInButtonStyleIconOnly,
                   .BUTTON_SIZE_STANDARD = kGIDSignInButtonStyleStandard,
                   .BUTTON_SIZE_WIDE = kGIDSignInButtonStyleWide,
+#else
+                  .BUTTON_SIZE_STANDARD = 0,
+                  .BUTTON_SIZE_WIDE = 1,
+                  .BUTTON_SIZE_ICON = 2,
 #endif
                   .SIGN_IN_CANCELLED = [@(kGIDSignInErrorCodeCanceled) stringValue],
                   .SIGN_IN_REQUIRED = [@(kGIDSignInErrorCodeHasNoAuthInKeychain) stringValue],
@@ -82,45 +87,68 @@ RCT_EXPORT_METHOD(configure:(NSDictionary *)options
                   resolve:(RCTPromiseResolveBlock)resolve
                   reject:(RCTPromiseRejectBlock)reject)
 {
-  NSString *pathName = options[@"googleServicePlistPath"] ? options[@"googleServicePlistPath"] : @"GoogleService-Info";
+  NSError *error;
+  ClientConfiguration config = [self readConfigurationWithOptions:options error:&error];
 
-  NSURL *path = [[NSBundle mainBundle] URLForResource:pathName withExtension:@"plist"];
-
-  if (!options[@"iosClientId"] && !path) {
-    NSString* message = @"RNGoogleSignin: failed to determine clientID - GoogleService-Info.plist was not found and iosClientId was not provided. To fix this error:\nIf you use Firebase, download GoogleService-Info.plist file from Firebase and place it into the project. Read the iOS guide / Expo guide to learn more.\nOtherwise pass 'iosClientId' option to configure().";
-    RCTLogError(@"%@", message);
-    reject(@"configure", message, nil);
+  if (error) {
+    RCTLogError(@"RNGoogleSignin: %@", error.localizedDescription);
+    reject(@"configure", error.localizedDescription, error);
     return;
   }
 
-  NSString* clientId;
-  if (options[@"iosClientId"]) {
-    clientId = options[@"iosClientId"];
-  } else {
-    NSError *error;
-    NSDictionary *plist = [[NSDictionary alloc] initWithContentsOfURL:path error:&error];
-    if (error) {
-      NSString* message = [NSString stringWithFormat:@"RNGoogleSignin: Failed to read GoogleService-Info.plist."];
-      RCTLogError(@"%@", message);
-      reject(@"configure", message, error);
-      return;
-    }
-    clientId = plist[kClientIdKey];
-  }
-
-  GIDConfiguration* config = [[GIDConfiguration alloc] initWithClientID:clientId serverClientID:options[@"webClientId"] hostedDomain:options[@"hostedDomain"] openIDRealm:options[@"openIDRealm"]];
-  GIDSignIn.sharedInstance.configuration = config;
+  GIDConfiguration* googleConfig = [[GIDConfiguration alloc] initWithClientID:config.clientId
+                                                               serverClientID:config.webClientId
+                                                                 hostedDomain:options[@"hostedDomain"]
+                                                                  openIDRealm:options[@"openIDRealm"]];
+  GIDSignIn.sharedInstance.configuration = googleConfig;
 
   _profileImageSize = 120;
   if (options[@"profileImageSize"]) {
     NSNumber* size = options[@"profileImageSize"];
-    _profileImageSize = [size unsignedIntegerValue];
+    _profileImageSize = size.unsignedIntegerValue;
   }
 
   _scopes = options[@"scopes"];
 
   resolve([NSNull null]);
 }
+
+- (ClientConfiguration)readConfigurationWithOptions:(NSDictionary *)options error:(NSError **)error {
+  const ClientConfiguration emptyConfig = { nil, nil };
+
+  NSString *webClientId = options[@"webClientId"];
+  NSString *iosClientId = options[@"iosClientId"];
+
+  BOOL shouldAttemptWebClientIdDetection = !webClientId || [@"autoDetect" isEqualToString:webClientId];
+  if (!iosClientId || shouldAttemptWebClientIdDetection) {
+    NSString *pathName = options[@"googleServicePlistPath"] ?: @"GoogleService-Info";
+    NSURL *plistPath = [NSBundle.mainBundle URLForResource:pathName withExtension:@"plist"];
+    if (!plistPath) {
+      NSString *message = @"Failed to determine configuration: Either specify `iosClientId` (and optionally `offlineAccess: true, webClientId: xyz`) in configure(), or make sure that Firebase's GoogleService-Info.plist file is present in the project - if you use Firebase, download GoogleService-Info.plist file from Firebase and place it into the project. Read the iOS guide / Expo guide to learn more.";
+      if (error) {
+        *error = [NSError errorWithDomain:@"RNGoogleSignin" code:1001 userInfo:@{NSLocalizedDescriptionKey: message}];
+      }
+      return emptyConfig;
+    }
+    NSDictionary *plist = [[NSDictionary alloc] initWithContentsOfURL:plistPath error:error];
+    if (*error) {
+      return emptyConfig;
+    }
+    iosClientId = iosClientId ?: plist[kClientIdKey];
+    webClientId = plist[@"WEB_CLIENT_ID"];
+    BOOL offlineAccessRequested = [options[@"offlineAccess"] boolValue];
+    if (offlineAccessRequested && !webClientId) {
+      NSString *message = @"Successfully read GoogleService-Info.plist in order to determine 'webClientId' for offline access. However, the `WEB_CLIENT_ID` entry was not present in the file.";
+      if (error) {
+        *error = [NSError errorWithDomain:@"RNGoogleSignin" code:1002 userInfo:@{NSLocalizedDescriptionKey: message}];
+      }
+      return emptyConfig;
+    }
+  }
+  const ClientConfiguration populatedConfig = { iosClientId, webClientId };
+  return populatedConfig;
+}
+
 
 RCT_EXPORT_METHOD(signInSilently:(RCTPromiseResolveBlock)resolve
                   reject:(RCTPromiseRejectBlock)reject)
@@ -229,17 +257,6 @@ RCT_EXPORT_METHOD(getTokens:(RCTPromiseResolveBlock)resolve
   }];
 }
 
-- (void)playServicesAvailable:(BOOL)showPlayServicesUpdateDialog resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject {
-    // never called on ios
-    resolve(@(YES));
-}
-
-- (void)clearCachedAccessToken:(NSString *)tokenString resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject {
-    // never called on ios
-    resolve([NSNull null]);
-}
-
-
 - (NSDictionary*)createUserDictionary: (nullable GIDSignInResult *) result {
   return [self createUserDictionary:result.user serverAuthCode:result.serverAuthCode];
 }
@@ -315,6 +332,17 @@ RCT_EXPORT_METHOD(getTokens:(RCTPromiseResolveBlock)resolve
 }
 
 #ifdef RCT_NEW_ARCH_ENABLED
+
+- (void)playServicesAvailable:(BOOL)showPlayServicesUpdateDialog resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject {
+    // never called on ios
+    resolve(@(YES));
+}
+
+- (void)clearCachedAccessToken:(NSString *)tokenString resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject {
+    // never called on ios
+    resolve([NSNull null]);
+}
+
 - (std::shared_ptr<facebook::react::TurboModule>)getTurboModule:
    (const facebook::react::ObjCTurboModule::InitParams &)params
 {

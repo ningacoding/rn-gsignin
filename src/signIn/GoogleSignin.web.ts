@@ -27,7 +27,7 @@ async function hasPlayServices(
   return false;
 }
 
-function configure(_options: ConfigureParams = {}): void {
+function configure(_options: ConfigureParams): void {
   logNotImplementedError();
 }
 

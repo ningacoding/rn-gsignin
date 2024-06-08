@@ -6,7 +6,7 @@ import type { NativeModuleError } from '../types';
 
 const getError = (): NativeModuleError => {
   const err = new Error(
-    `WebGoogleOneTapSignIn is not available on the ${Platform.OS}. Use the GoogleOneTapSignIn module instead.`,
+    `WebGoogleOneTapSignIn is deprecated. Also, WebGoogleOneTapSignIn is not available on ${Platform.OS}. Use the GoogleOneTapSignIn module instead.`,
   );
   Object.assign(err, {
     code: statusCodes.SIGN_IN_CANCELLED,

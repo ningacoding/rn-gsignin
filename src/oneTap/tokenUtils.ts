@@ -1,5 +1,5 @@
 import { jwtDecode, JwtPayload } from 'jwt-decode';
-import { OneTapUser } from './types';
+import type { OneTapUser } from './types';
 
 type JwtContents = {
   name: string | null;

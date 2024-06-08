@@ -5,7 +5,7 @@ import {
   GoogleSigninButton,
   GoogleOneTapSignIn,
   isErrorWithCode,
-  WebGoogleOneTapSignIn,
+  WebGoogleOneTapSignIn, // TODO test the web impl of GoogleOneTapSignIn
 } from '@react-native-google-signin/google-signin';
 import { mockOneTapUserInfo, mockUserInfo } from '../../jest/setup';
 import {
@@ -14,8 +14,11 @@ import {
   createNotShownError,
   createSignOutFailedError,
 } from '../errors/errorCodes.web';
+import { validateWebClientId as validateNative } from '../oneTap/validateWebClientId';
+import { validateWebClientId as validateWeb } from '../oneTap/validateWebClientId.web';
+import { mockConsole } from './_mockConsole';
 
-describe('GoogleSignin', () => {
+describe('Google Sign In', () => {
   describe('sanity checks for exported mocks', () => {
     it('oneTapSignIn', async () => {
       expect(
@@ -110,5 +113,28 @@ describe('GoogleSignin', () => {
   ])('isErrorWithCode returns true for exported web errors', ({ getError }) => {
     const err = getError();
     expect(isErrorWithCode(err)).toBe(true);
+  });
+
+  describe('validateWebClientId', () => {
+    const methods = [
+      { method: validateNative, name: 'validateNative' },
+      { method: validateWeb, name: 'validateWeb' },
+    ];
+
+    describe.each(methods)('$name', ({ method }) => {
+      it.each([
+        { webClientId: 'mockWebClientId', shouldError: true },
+        { webClientId: '123.apps.googleusercontent.com', shouldError: false },
+        { webClientId: 'autoDetect', shouldError: method === validateWeb },
+      ])(
+        '$name: console.error should be called when webClientId is $webClientId',
+        ({ webClientId, shouldError }) => {
+          mockConsole((console) => {
+            method({ webClientId });
+            expect(console.error).toHaveBeenCalledTimes(shouldError ? 1 : 0);
+          });
+        },
+      );
+    });
   });
 });

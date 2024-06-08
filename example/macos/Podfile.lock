@@ -1134,7 +1134,7 @@ PODS:
     - React-Core
     - React-jsi
   - ReactTestApp-Resources (1.0.0-dev)
-  - RNGoogleSignin (15.0.1):
+  - RNGoogleSignin (15.1.1):
     - glog
     - GoogleSignIn (~> 7.1)
     - hermes-engine
@@ -1403,8 +1403,8 @@ SPEC CHECKSUMS:
   ReactCommon: 13bb5659bf6d82a9cecd9b2b418e99ba40e4a4f1
   ReactNativeHost: 05cdf11f8fe7df2926fd216e3a421cde29f9fbfe
   ReactTestApp-DevSupport: 9052e9a0ba3a96a3cc574ee66c7b6089ee76b341
-  ReactTestApp-Resources: 9d83e280b173ba2ee053b8135730dff60f9ab674
-  RNGoogleSignin: f67e38d6d16209b5f3777abd809d957b352d59fc
+  ReactTestApp-Resources: a470a3461a461a326157085205702c9a4606a3ea
+  RNGoogleSignin: 244e796916f0fa634db5d18e9df7fa77d5d33068
   SocketRocket: f6c6249082c011e6de2de60ed641ef8bbe0cfac9
   Yoga: 9beedd0c2748cf1d84279f1048486732ee1cb225
 

@@ -1,3 +1,5 @@
+import type { ClientId } from './oneTap/types';
+
 /**
  * @group Original Google sign in
  * */
@@ -20,7 +22,7 @@ export type ConfigureParams = {
   /**
    * Web client ID from Developer Console. Required for offline access.
    */
-  webClientId?: string;
+  webClientId: ClientId;
 
   /**
    * Must be true if you wish to access user APIs on behalf of the user from your own server.
@@ -60,7 +62,8 @@ export type ConfigureParams = {
 export type ClientIdOrPlistPath =
   | {
       /**
-       * If you want to specify the client ID of type iOS
+       * If you want to specify the client ID of type iOS.
+       * It is taken from the `GoogleService-Info.plist` file by default. Mutually exclusive with `googleServicePlistPath`.
        */
       iosClientId?: string;
     }

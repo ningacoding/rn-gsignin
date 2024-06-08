@@ -20,9 +20,10 @@ export const OneTapUserInfo = ({
           user: {
             ...userInfo.user,
             id: userInfo.user.id.slice(0, 5) + '...',
-            photo: `${userInfo.user.photo?.slice(0, 5)}...`,
+            photo: `${userInfo.user.photo?.slice(0, 25)}...`,
           },
           idToken: `${userInfo.idToken?.slice(0, 5)}...`,
+          serverAuthCode: `${userInfo.serverAuthCode?.slice(0, 5)}...`,
         })}
       </Text>
       {userInfo.user.photo && (
