@@ -12,6 +12,8 @@ import { validateWebClientId } from '../oneTap/validateWebClientId';
 
 let configPromise = Promise.resolve();
 
+export const getConfigPromise = () => configPromise;
+
 function configure(options: ConfigureParams): void {
   validateWebClientId(options);
   configPromise = NativeModule.configure(options);

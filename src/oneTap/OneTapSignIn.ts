@@ -1,5 +1,5 @@
 import type { OneTapSignInModule, OneTapUser } from './types';
-import { GoogleSignin } from '../signIn/GoogleSignin';
+import { getConfigPromise, GoogleSignin } from '../signIn/GoogleSignin';
 import {
   ios_only_SCOPES_ALREADY_GRANTED,
   statusCodes,
@@ -23,6 +23,7 @@ const signInSilently: OneTapSignInModule['signIn'] = async (
   warnBadApiUsage(callbacks);
 
   GoogleSignin.configure(params);
+  await getConfigPromise();
   try {
     const { user, idToken, serverAuthCode } =
       await GoogleSignin.signInSilently();
@@ -57,6 +58,8 @@ const createAccount: OneTapSignInModule['signIn'] = async (
 ) => {
   warnBadApiUsage(callbacks);
   GoogleSignin.configure(params);
+  await getConfigPromise();
+
   const { user, idToken, serverAuthCode } = await GoogleSignin.signIn({
     // TODO
     // loginHint: params?.loginHint,
