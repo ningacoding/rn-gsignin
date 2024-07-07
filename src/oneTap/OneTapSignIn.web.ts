@@ -7,7 +7,6 @@ import type {
 import {
   createCancelError,
   createGoogleSdkNotFoundError,
-  createNotShownError,
   statusCodes,
   createSignOutFailedError,
 } from '../errors/errorCodes.web';
@@ -48,6 +47,7 @@ export const signInImplWeb = (
     auto_select,
     nonce,
     context: 'signin',
+    use_fedcm_for_prompt: true,
     ...otherParams,
     callback: ({ credential: idToken, select_by }) => {
       const user = extractUser(idToken);
@@ -64,17 +64,8 @@ export const signInImplWeb = (
 
   if (!skipPrompt) {
     google.accounts.id.prompt((notification) => {
-      if (notification.isNotDisplayed()) {
-        const err = createNotShownError(notification.getNotDisplayedReason());
-        onError(err);
-      }
       if (notification.isSkippedMoment()) {
-        const skippedReason = notification.getSkippedReason();
-        if (
-          ['auto_cancel', 'user_cancel', 'tap_outside'].includes(skippedReason)
-        ) {
-          onError(createCancelError(skippedReason));
-        }
+        onError(createCancelError());
       }
       if (notification.isDismissedMoment()) {
         const dismissedReason = notification.getDismissedReason();
@@ -141,7 +132,7 @@ const signOutWeb = async (emailOrUniqueId: string): Promise<null> => {
 
 const throwApiUnavailableError = async () => {
   const err = new Error(
-    'The function you called is not implemented on the Web platform.',
+    '`requestAuthorization` is not implemented on the Web platform.',
   );
   Object.assign(err, {
     code: statusCodes.PLAY_SERVICES_NOT_AVAILABLE,

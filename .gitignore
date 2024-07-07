@@ -64,8 +64,6 @@ lib/
 !.yarn/plugins
 
 
-docs/
-
 # Local Netlify folder
 .netlify
 

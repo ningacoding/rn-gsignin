@@ -52,7 +52,7 @@ const signInSilently: OneTapSignInModule['signIn'] = async (
   }
 };
 
-const createAccount: OneTapSignInModule['signIn'] = async (
+const createAccount: OneTapSignInModule['createAccount'] = async (
   params,
   callbacks,
 ) => {
@@ -61,8 +61,7 @@ const createAccount: OneTapSignInModule['signIn'] = async (
   await getConfigPromise();
 
   const { user, idToken, serverAuthCode } = await GoogleSignin.signIn({
-    // TODO
-    // loginHint: params?.loginHint,
+    loginHint: params?.accountName,
   });
   if (!idToken) {
     throwNoIdToken('signIn / createAccount');

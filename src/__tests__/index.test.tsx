@@ -11,7 +11,6 @@ import { mockOneTapUserInfo, mockUserInfo } from '../../jest/setup';
 import {
   createCancelError,
   createGoogleSdkNotFoundError,
-  createNotShownError,
   createSignOutFailedError,
 } from '../errors/errorCodes.web';
 import { validateWebClientId as validateNative } from '../oneTap/validateWebClientId';
@@ -103,10 +102,7 @@ describe('Google Sign In', () => {
     },
   );
   test.each([
-    { getError: () => createCancelError('auto_cancel') },
-    {
-      getError: () => createNotShownError('browser_not_supported'),
-    },
+    { getError: () => createCancelError() },
     { getError: createGoogleSdkNotFoundError },
     { getError: createSignOutFailedError },
     // errors from native module do have `code` property as well, but they are kinda impossible to test here

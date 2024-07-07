@@ -17,24 +17,12 @@ export const statusCodes = Object.freeze(statusCodesRaw);
 // TODO vonovak add cause to error
 
 export const createCancelError = (
-  reason:
-    | ReturnType<PromptMomentNotification['getSkippedReason']>
-    | ReturnType<PromptMomentNotification['getDismissedReason']>,
+  reason?: ReturnType<PromptMomentNotification['getDismissedReason']>,
 ): NativeModuleError => {
-  const err = new Error(`User cancelled the sign in flow: ${reason}`);
+  const suffix = reason ? `: ${reason}` : '';
+  const err = new Error(`User cancelled the sign in flow${suffix}.`);
   Object.assign(err, {
     code: statusCodes.SIGN_IN_CANCELLED,
-  });
-  return <NativeModuleError>err;
-};
-
-export const createNotShownError = (
-  reason: ReturnType<PromptMomentNotification['getNotDisplayedReason']>,
-): NativeModuleError => {
-  // happens with rate limiting
-  const err = new Error(`One-tap sign in not displayed: ${reason}`);
-  Object.assign(err, {
-    code: statusCodes.ONE_TAP_START_FAILED,
   });
   return <NativeModuleError>err;
 };

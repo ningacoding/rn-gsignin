@@ -78,6 +78,7 @@ export const OneTapApp = () => {
         {
           webClientId: webClientId,
           ux_mode: 'popup',
+          log_level: 'debug',
         },
         {
           onError: (error) => {
@@ -123,7 +124,7 @@ export const OneTapApp = () => {
           alert('in progress');
           break;
         case statusCodes.ONE_TAP_START_FAILED:
-          // Android and Web only
+          // Android only
           alert('failed to present one tap UI:' + error.toString());
           break;
         case statusCodes.PLAY_SERVICES_NOT_AVAILABLE:

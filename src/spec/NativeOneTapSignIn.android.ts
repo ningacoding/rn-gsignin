@@ -6,6 +6,7 @@ export interface Spec extends TurboModule {
   signIn(params: {
     webClientId: string;
     nonce?: string;
+    requestVerifiedPhoneNumber?: boolean;
     autoSignIn: boolean;
     filterByAuthorizedAccounts: boolean;
   }): Promise<OneTapUser>;

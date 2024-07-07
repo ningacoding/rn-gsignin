@@ -6,15 +6,20 @@ import type {
   SignInParams,
   User,
 } from '../types';
+import { statusCodes } from '../errors/errorCodes.web';
+type ImplementedModuleShape = typeof import('./GoogleSignin').GoogleSignin;
 
 const errorMessage = 'RNGoogleSignIn: you are calling a not-implemented method';
 const logNotImplementedError = () => {
   console.warn(errorMessage);
 };
 
-const throwNotImplementedError = () => {
-  throw new Error(errorMessage);
-};
+function throwNotImplementedError(): never {
+  const e = new Error(errorMessage);
+  // the docs say that the errors produced by the module should have a code property
+  Object.assign(e, { code: statusCodes.PLAY_SERVICES_NOT_AVAILABLE });
+  throw e;
+}
 
 async function signIn(_options: SignInParams = {}): Promise<User> {
   return throwNotImplementedError();
@@ -69,7 +74,7 @@ async function getTokens(): Promise<GetTokensResponse> {
   return throwNotImplementedError();
 }
 
-export const GoogleSignin = {
+export const GoogleSignin: ImplementedModuleShape = {
   hasPlayServices,
   configure,
   signIn,

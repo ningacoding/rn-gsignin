@@ -41,6 +41,20 @@ export type OneTapSignInParams = {
 /**
  * @group One-tap sign in module
  * */
+export type OneTapCreateAccountParams = OneTapSignInParams & {
+  /**
+   * iOS only. An account name present on the device that should be used.
+   * */
+  accountName?: string;
+  /**
+   * Android only. Whether to request for a verified phone number during sign-ups. False by default.
+   * */
+  requestVerifiedPhoneNumber?: boolean;
+};
+
+/**
+ * @group One-tap sign in module
+ * */
 export type OneTapUser = {
   user: {
     id: string;
@@ -94,19 +108,22 @@ export type RequestAuthorizationParams = {
 };
 
 // TODO
-// type SignInResponse =
-//   | {
-//       result: 'success';
-//       credential: OneTapUser;
-//     }
-//   | {
-//       result: 'cancelled';
-//       credential: null;
-//     }
-//   | {
-//       result: 'no_saved_credential_found';
-//       credential: null;
-//     };
+// type OneTapSuccessResponse = {
+//   result: 'success';
+//   credential: OneTapUser;
+// };
+// type OneTapCancelledResponse = {
+//   result: 'cancelled';
+//   credential: null;
+// };
+// type OneTapNoSavedCredentialFound = {
+//   result: 'no_saved_credential_found';
+//   credential: null;
+// };
+// export type OneTapResponse =
+//   | OneTapSuccessResponse
+//   | OneTapCancelledResponse
+//   | OneTapNoSavedCredentialFound;
 
 /**
  * An object that contains an access token that has access to the `grantedScopes`.
@@ -129,11 +146,18 @@ export interface SignInInterface {
   (params: OneTapSignInParams, callbacks: WebOneTapSignInCallbacks): void;
   (params: OneTapSignInParams, callbacks?: never): Promise<OneTapUser>;
 }
+export interface CreateAccountInterface {
+  (
+    params: OneTapCreateAccountParams,
+    callbacks: WebOneTapSignInCallbacks,
+  ): void;
+  (params: OneTapCreateAccountParams, callbacks?: never): Promise<OneTapUser>;
+}
 // this is the public interface of the module
 export type OneTapSignInModule = {
   signIn: SignInInterface;
+  createAccount: CreateAccountInterface;
   presentExplicitSignIn: SignInInterface;
-  createAccount: SignInInterface;
   requestAuthorization: (
     options: RequestAuthorizationParams,
   ) => Promise<AuthorizationResponse>;

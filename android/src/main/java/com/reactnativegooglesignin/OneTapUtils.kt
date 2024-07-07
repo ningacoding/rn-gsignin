@@ -44,15 +44,16 @@ class OneTapUtils {
       val nonce = params.getString("nonce")
       val autoSignIn = params.getBoolean("autoSignIn")
       val filterByAuthorizedAccounts = params.getBoolean("filterByAuthorizedAccounts")
+      val requestVerifiedPhoneNumber = params.hasKey("requestVerifiedPhoneNumber") && params.getBoolean("requestVerifiedPhoneNumber")
 
       return GetGoogleIdOption.Builder()
         .setServerClientId(getWebClientId(params))
         .setFilterByAuthorizedAccounts(filterByAuthorizedAccounts)
         .setNonce(nonce)
         .setAutoSelectEnabled(autoSignIn)
-//        TODO, only for sign-ups
-//         https://developers.google.com/identity/android-credential-manager/android/reference/com/google/android/libraries/identity/googleid/GetGoogleIdOption.Builder#setRequestVerifiedPhoneNumber(kotlin.Boolean)
-//        .setRequestVerifiedPhoneNumber()
+        // NOTE - only for sign-ups
+        // https://developers.google.com/identity/android-credential-manager/android/reference/com/google/android/libraries/identity/googleid/GetGoogleIdOption.Builder#setRequestVerifiedPhoneNumber(kotlin.Boolean)
+        .setRequestVerifiedPhoneNumber(requestVerifiedPhoneNumber)
         .build()
     }
 
