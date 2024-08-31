@@ -42,7 +42,7 @@ const config = {
         return acc;
       },
       {
-        '@react-native-google-signin/google-signin': root,
+        '@klazify/google-signin': root,
       },
     ),
   },

@@ -27,7 +27,7 @@ const config = {
     blockList,
     // for some reason, since 0.73, metro does not see this
     extraNodeModules: {
-      '@react-native-google-signin/google-signin': __dirname,
+      '@klazify/google-signin': __dirname,
     },
   },
   transformer: {

@@ -130,6 +130,6 @@ const mockModule: ExportedModuleType = Object.freeze({
   WebGoogleOneTapSignIn: mockWebGoogleSignIn,
 });
 
-jest.mock('@react-native-google-signin/google-signin', () => {
+jest.mock('@klazify/google-signin', () => {
   return mockModule;
 });

@@ -21,7 +21,7 @@ module.exports = {
     ...(project
       ? {
           // Help rn-cli find and autolink this library
-          '@react-native-google-signin/google-signin': {
+          '@klazify/google-signin': {
             root: __dirname,
           },
           'expo': {

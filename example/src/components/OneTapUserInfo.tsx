@@ -1,5 +1,5 @@
 import React from 'react';
-import { OneTapUser } from '@react-native-google-signin/google-signin';
+import { OneTapUser } from '@klazify/google-signin';
 import { Button, Image, StyleSheet, Text, View } from 'react-native';
 import { prettyJson, PROFILE_IMAGE_SIZE } from './components';
 

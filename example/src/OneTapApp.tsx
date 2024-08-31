@@ -18,7 +18,7 @@ import {
   WebGoogleSigninButton,
   GoogleSigninButton,
   isErrorWithCode,
-} from '@react-native-google-signin/google-signin';
+} from '@klazify/google-signin';
 // @ts-ignore see docs/CONTRIBUTING.md for details
 import config from './config/config';
 import { configureGoogleSignIn, RenderError } from './components/components';

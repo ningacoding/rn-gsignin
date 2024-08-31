@@ -9,7 +9,7 @@ import {
   withInfoPlist,
 } from 'expo/config-plugins';
 
-const pkg = require('@react-native-google-signin/google-signin/package.json');
+const pkg = require('@klazify/google-signin/package.json');
 
 type Options = {
   iosUrlScheme: string;

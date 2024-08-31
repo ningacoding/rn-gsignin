@@ -6,7 +6,7 @@ import {
   GoogleOneTapSignIn,
   isErrorWithCode,
   WebGoogleOneTapSignIn, // TODO test the web impl of GoogleOneTapSignIn
-} from '@react-native-google-signin/google-signin';
+} from '@klazify/google-signin';
 import { mockOneTapUserInfo, mockUserInfo } from '../../jest/setup';
 import {
   createCancelError,

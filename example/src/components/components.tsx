@@ -2,7 +2,7 @@ import { Alert, Button, Text } from 'react-native';
 import {
   GoogleSignin,
   statusCodes,
-} from '@react-native-google-signin/google-signin';
+} from '@klazify/google-signin';
 import React from 'react';
 // @ts-ignore see docs/CONTRIBUTING.md for details
 import config from '../config/config';

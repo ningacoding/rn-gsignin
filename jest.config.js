@@ -10,7 +10,7 @@ const config = {
     '<rootDir>/lib/',
   ],
   moduleNameMapper: {
-    '@react-native-google-signin/google-signin': '<rootDir>/src/index.ts',
+    '@klazify/google-signin': '<rootDir>/src/index.ts',
   },
   testPathIgnorePatterns,
 };

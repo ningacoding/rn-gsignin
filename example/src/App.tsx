@@ -17,7 +17,7 @@ import {
   NativeModuleError,
   statusCodes,
   User,
-} from '@react-native-google-signin/google-signin';
+} from '@klazify/google-signin';
 
 import { TokenClearingView } from './components/TokenClearingView';
 import {
