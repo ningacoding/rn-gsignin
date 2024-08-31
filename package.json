@@ -1,5 +1,5 @@
 {
-  "name": "@react-native-google-signin/google-signin",
+  "name": "@klazify/google-signin",
   "version": "16.0.1",
   "description": "Google sign in for your react native applications",
   "main": "lib/commonjs/index",
@@ -58,15 +58,18 @@
     "android",
     "web"
   ],
-  "repository": "https://github.com/react-native-google-signin/google-signin-next",
-  "author": "Vojtech Novak <vonovak@gmail.com> (https://github.com/vonovak)",
-  "bugs": {
-    "url": "https://github.com/react-native-google-signin/google-signin/issues"
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ningacoding/google-signin.git"
   },
-  "homepage": "https://github.com/react-native-google-signin/google-signin#readme",
+  "author": "Author",
+  "bugs": {
+    "url": "https://github.com/"
+  },
+  "homepage": "https://github.com/",
   "publishConfig": {
     "registry": "https://npm.pkg.github.com",
-    "access": "restricted"
+    "access": "public"
   },
   "devDependencies": {
     "@babel/eslint-parser": "^7.24.1",
@@ -147,6 +150,10 @@
     "jwt-decode": "^4.0.0",
     "nanoevents": "^9.0.0"
   },
-  "packageManager": "yarn@4.1.1",
-  "GoogleSignInPodVersion": "~> 7.1"
+  "GoogleSignInPodVersion": "~> 7.1",
+  "directories": {
+    "example": "example",
+    "lib": "lib"
+  },
+  "license": "ISC"
 }
