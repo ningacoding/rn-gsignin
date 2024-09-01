@@ -1,7 +1,3 @@
-![React Native Google Sign In](img/header.png)
+working package:
 
-❤❤ Thank you for sponsoring! ❤❤
-
-## Documentation
-
-Please follow the new docs at [react-native-google-signin.github.io](https://react-native-google-signin.github.io/)!
+`"@klazify/google-signin": "https://github.com/ningacoding/google-signin.git#2ecc016"`
