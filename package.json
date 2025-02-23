@@ -60,7 +60,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/ningacoding/google-signin.git"
+    "url": "git+https://github.com/ningacoding/rn-gsignin.git"
   },
   "author": "Author",
   "bugs": {
